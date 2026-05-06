@@ -21,6 +21,7 @@ export type Transaction = {
   amount: number;
   type: 'peşin' | 'veresiye' | 'tahsilat' | 'puan_kullanımı';
   description: string;
+  dueDate?: string;
 };
 
 export type Campaign = {
@@ -41,7 +42,7 @@ interface DemoState {
   login: (role: 'customer' | 'merchant' | 'admin') => void;
   logout: () => void;
   resetDemo: () => void;
-  addSale: (customerId: string, amount: number, type: 'peşin' | 'veresiye' | 'puan_kullanımı', description: string, pointsToUse?: number) => void;
+  addSale: (customerId: string, amount: number, type: 'peşin' | 'veresiye' | 'puan_kullanımı', description: string, pointsToUse?: number, dueDate?: string) => void;
   addPayment: (customerId: string, amount: number) => void;
   addCampaign: (campaign: Omit<Campaign, 'id' | 'status'>) => void;
   addCustomer: (customer: Omit<DemoUser, 'id' | 'qrCode' | 'role' | 'usedCredit' | 'points' | 'riskLevel'>) => void;
@@ -63,11 +64,11 @@ const INITIAL_CAMPAIGNS: Campaign[] = [
 ];
 
 const INITIAL_TRANSACTIONS: Transaction[] = [
-  { id: 't1', customerId: 'c1', date: new Date().toISOString(), amount: 350, type: 'veresiye', description: 'Hızlı Şarj Adaptörü ve Kablo' },
+  { id: 't1', customerId: 'c1', date: new Date().toISOString(), amount: 350, type: 'veresiye', description: 'Hızlı Şarj Adaptörü ve Kablo', dueDate: new Date(Date.now() + 864000000).toISOString() },
   { id: 't2', customerId: 'c1', date: new Date(Date.now() - 86400000).toISOString(), amount: -500, type: 'tahsilat', description: 'Kısmi Nakit Ödeme' },
   { id: 't3', customerId: 'c4', date: new Date(Date.now() - 172800000).toISOString(), amount: 1200, type: 'peşin', description: 'Bluetooth Kulaklık (JBL)' },
-  { id: 't4', customerId: 'c3', date: new Date(Date.now() - 259200000).toISOString(), amount: 2500, type: 'veresiye', description: 'Ekran Değişimi - iPhone 11' },
-  { id: 't5', customerId: 'c5', date: new Date(Date.now() - 345600000).toISOString(), amount: 150, type: 'veresiye', description: 'Nano Cam Koruyucu' },
+  { id: 't4', customerId: 'c3', date: new Date(Date.now() - 259200000).toISOString(), amount: 2500, type: 'veresiye', description: 'Ekran Değişimi - iPhone 11', dueDate: new Date(Date.now() + 432000000).toISOString() },
+  { id: 't5', customerId: 'c5', date: new Date(Date.now() - 345600000).toISOString(), amount: 150, type: 'veresiye', description: 'Nano Cam Koruyucu', dueDate: new Date(Date.now() + 259200000).toISOString() },
   { id: 't6', customerId: 'c2', date: new Date(Date.now() - 432000000).toISOString(), amount: 450, type: 'peşin', description: 'Powerbank 10.000 mAh' },
 ];
 
@@ -107,7 +108,7 @@ export const useDemoStore = create<DemoState>()(
         toast.success('Demo verileri tertemiz hale getirildi!');
       },
 
-      addSale: (customerId, amount, type, description, pointsToUse = 0) => {
+      addSale: (customerId, amount, type, description, pointsToUse = 0, dueDate) => {
         set((state) => {
           const customerIndex = state.customers.findIndex(c => c.id === customerId);
           if (customerIndex === -1) {
@@ -128,14 +129,14 @@ export const useDemoStore = create<DemoState>()(
              });
           } else if (type === 'veresiye') {
              if (customer.creditLimit - customer.usedCredit < amount) {
-                toast.error('Limit Yetersiz: Müşterinin veresiye limiti bu işlem için uygun değil.');
+                toast.error('Müşterinin kalan limiti yetersiz!');
                 return state;
              }
              customer.usedCredit += amount;
-             toast.success(`Borç kaydedildi. Kalan limit: ₺${(customer.creditLimit - customer.usedCredit).toLocaleString()}`, { icon: '📝' });
+             toast.success(`Veresiye satış kaydedildi! Kalan limit: ₺${(customer.creditLimit - customer.usedCredit).toLocaleString()}`, { icon: '📝' });
           } else if (type === 'puan_kullanımı') {
              if (customer.points < pointsToUse) {
-                toast.error('Puan Yetersiz: Müşterinin bu kadar puanı bulunmuyor.');
+                toast.error('Müşterinin bu kadar puanı bulunmuyor.');
                 return state;
              }
              customer.points -= pointsToUse;
@@ -150,7 +151,8 @@ export const useDemoStore = create<DemoState>()(
             date: new Date().toISOString(),
             amount,
             type,
-            description
+            description,
+            dueDate
           };
 
           return {

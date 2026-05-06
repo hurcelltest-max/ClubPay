@@ -10,13 +10,22 @@ export default function MerchantTransactions() {
   const [amount, setAmount] = useState('');
   const [saleType, setSaleType] = useState<'peşin' | 'veresiye' | 'puan_kullanımı'>('peşin');
   const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
 
   const handleSaleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCustomerId || !amount) return;
-    addSale(selectedCustomerId, Number(amount), saleType, description || 'Mağaza Alışverişi', saleType === 'puan_kullanımı' ? Number(amount) : 0);
+    addSale(
+      selectedCustomerId, 
+      Number(amount), 
+      saleType, 
+      description || 'Mağaza Alışverişi', 
+      saleType === 'puan_kullanımı' ? Number(amount) : 0,
+      dueDate
+    );
     setAmount('');
     setDescription('');
+    setDueDate('');
   };
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
@@ -27,25 +36,25 @@ export default function MerchantTransactions() {
   };
 
   return (
-    <div>
+    <div className="animate-in fade-in duration-500">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Satış & Tahsilat İşlemleri</h1>
-        <p className="text-gray-500 mt-1">Veresiye işlemlerinizi ve tahsilatlarınızı yönetin</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Satış & Tahsilat</h1>
+        <p className="text-slate-500 mt-1 font-medium">Veresiye satışlarınızı ve tahsilatlarınızı yönetin</p>
       </div>
 
-      <div className="bg-white rounded-[2rem] shadow-card border border-slate-100 overflow-hidden max-w-2xl">
-        <div className="flex border-b border-slate-100 bg-slate-50/30">
+      <div className="bg-white rounded-[2.5rem] shadow-premium border border-slate-100 overflow-hidden max-w-2xl">
+        <div className="flex border-b border-slate-100 bg-slate-50/30 p-2">
           <button 
-            className={`flex-1 py-6 font-extrabold text-sm uppercase tracking-wider text-center flex items-center justify-center gap-3 transition-all ${activeTab === 'sale' ? 'text-primary-600 bg-white shadow-sm border-r border-slate-100' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+            className={`flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-center flex items-center justify-center gap-3 transition-all ${activeTab === 'sale' ? 'text-primary-600 bg-white shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
             onClick={() => setActiveTab('sale')}
           >
             <CreditCard size={18} /> Yeni Satış
           </button>
           <button 
-            className={`flex-1 py-6 font-extrabold text-sm uppercase tracking-wider text-center flex items-center justify-center gap-3 transition-all ${activeTab === 'payment' ? 'text-emerald-600 bg-white shadow-sm border-l border-slate-100' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+            className={`flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-center flex items-center justify-center gap-3 transition-all ${activeTab === 'payment' ? 'text-emerald-600 bg-white shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
             onClick={() => setActiveTab('payment')}
           >
-            <ArrowDownCircle size={18} /> Borç Tahsilatı
+            <ArrowDownCircle size={18} /> Tahsilat Al
           </button>
         </div>
 
@@ -62,7 +71,7 @@ export default function MerchantTransactions() {
                 >
                   <option value="">İşlem yapılacak müşteriyi seçin...</option>
                   {customers.map(c => (
-                    <option key={c.id} value={c.id}>{c.name} — (Limit: ₺{c.creditLimit - c.usedCredit})</option>
+                    <option key={c.id} value={c.id}>{c.name} — (Kalan Limit: ₺{c.creditLimit - c.usedCredit})</option>
                   ))}
                 </select>
               </div>
@@ -83,7 +92,7 @@ export default function MerchantTransactions() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Ödeme Yöntemi</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Ödeme Türü</label>
                   <select 
                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all font-bold text-slate-700"
                     value={saleType}
@@ -96,39 +105,45 @@ export default function MerchantTransactions() {
                 </div>
               </div>
 
+              {saleType === 'veresiye' && (
+                <div className="animate-in slide-in-from-top-2 duration-300">
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Son Ödeme Tarihi</label>
+                  <input 
+                    type="date" 
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all font-bold text-slate-700"
+                    required={saleType === 'veresiye'}
+                  />
+                </div>
+              )}
+
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">İşlem Notu</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Açıklama</label>
                 <input 
                   type="text" 
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Örn: Tamir ücreti, Aksesuar satışı vb." 
+                  placeholder="Örn: Telefon tamiri, Aksesuar satışı..." 
                   className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all font-medium text-slate-600" 
                 />
               </div>
 
-              {/* Dynamic Info Cards */}
               <div className="animate-in fade-in zoom-in-95 duration-300">
                 {saleType === 'peşin' && (
-                  <div className="bg-primary-50 border border-primary-100 text-primary-700 p-5 rounded-2xl text-sm font-bold flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                      <Zap size={16} />
-                    </div>
-                    Müşteri bu işlemden %10 sadakat puanı kazanacaktır.
+                  <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 p-5 rounded-2xl text-sm font-bold flex items-center gap-3">
+                    <Zap size={18} /> Müşteri bu işlemden %10 puan kazanacaktır.
                   </div>
                 )}
                 {saleType === 'veresiye' && (
-                  <div className="bg-amber-50 border border-amber-100 text-amber-700 p-5 rounded-2xl text-sm font-bold flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                      <CreditCard size={16} />
-                    </div>
-                    Bu tutar müşterinin açık hesabına (veresiye) eklenecektir.
+                  <div className="bg-indigo-50 border border-indigo-100 text-indigo-700 p-5 rounded-2xl text-sm font-bold flex items-center gap-3">
+                    <CheckCircle2 size={18} /> Bu tutar müşterinin borç hanesine eklenecektir.
                   </div>
                 )}
               </div>
 
-              <button type="submit" className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-lg hover:bg-primary-600 transition-all shadow-xl hover:shadow-primary-500/20 active:scale-[0.98] mt-4">
-                İşlemi Tamamla ve Yazdır
+              <button type="submit" className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-lg hover:bg-primary-600 transition-all shadow-xl hover:shadow-primary-500/20 active:scale-[0.98]">
+                Satışı Kaydet
               </button>
             </form>
           ) : (

@@ -4,6 +4,8 @@ import { useDemoStore } from '../../store/demoStore';
 import { StatCard } from '../../components/ui/StatCard';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+import { Link } from 'react-router-dom';
+
 const mockChartData = [
   { name: 'Pzt', satis: 4000, veresiye: 2400 },
   { name: 'Sal', satis: 3000, veresiye: 1398 },
@@ -28,7 +30,13 @@ export default function MerchantDashboard() {
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Hoş Geldiniz, {user?.name || 'Esnaf'} 👋</h1>
           <p className="text-slate-500 mt-1 font-medium">İşletmenizin bugünkü finansal ve müşteri özeti</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+          <Link to="/merchant/transactions" className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95">
+            <CreditCard size={18} /> Veresiye Satış Ekle
+          </Link>
+          <Link to="/merchant/transactions" className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-95">
+            <TrendingUp size={18} /> Tahsilat Al
+          </Link>
           <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all active:scale-95">
             <ScanLine size={18} /> QR Okut
           </button>
