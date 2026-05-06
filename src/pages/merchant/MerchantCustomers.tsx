@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Search, Filter, PlusCircle, Globe, ShieldCheck } from 'lucide-react';
+import { Search, Filter, PlusCircle, Globe, ShieldCheck, MessageSquare } from 'lucide-react';
 import { useDemoStore } from '../../store/demoStore';
+import WhatsAppModal from '../../components/merchant/WhatsAppModal';
 
 export default function MerchantCustomers() {
   const { customers, addCustomer } = useDemoStore();
   const [showAdd, setShowAdd] = useState(false);
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', creditLimit: 2000 });
+  const [selectedCustomerForWhatsApp, setSelectedCustomerForWhatsApp] = useState<any>(null);
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,10 +70,10 @@ export default function MerchantCustomers() {
             <thead>
               <tr className="bg-slate-50/30 text-slate-400 text-[10px] uppercase tracking-[0.15em]">
                 <th className="p-6 font-extrabold border-b border-slate-100">Müşteri Bilgisi</th>
-                <th className="p-6 font-extrabold border-b border-slate-100">İletişim</th>
                 <th className="p-6 font-extrabold border-b border-slate-100 text-right">Puan Bakiyesi</th>
                 <th className="p-6 font-extrabold border-b border-slate-100 text-right">Limit / Borç</th>
-                <th className="p-6 font-extrabold border-b border-slate-100 text-center">Global Güven (Network)</th>
+                <th className="p-6 font-extrabold border-b border-slate-100 text-center">Güven Skoru (Ağ)</th>
+                <th className="p-6 font-extrabold border-b border-slate-100 text-center">İşlemler</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -86,9 +88,12 @@ export default function MerchantCustomers() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-400 mt-1 font-mono">{customer.qrCode}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-xs text-slate-400 font-mono">{customer.qrCode}</p>
+                      <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                      <p className="text-xs text-slate-500 font-medium">{customer.phone}</p>
+                    </div>
                   </td>
-                  <td className="p-6 text-slate-600 text-sm font-medium">{customer.phone}</td>
                   <td className="p-6 text-right">
                     <span className="px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full font-extrabold text-sm border border-primary-100">
                       {customer.points.toLocaleString()}
@@ -123,12 +128,29 @@ export default function MerchantCustomers() {
                       )}
                     </div>
                   </td>
+                  <td className="p-6 text-center">
+                    <button 
+                      onClick={() => setSelectedCustomerForWhatsApp(customer)}
+                      className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all shadow-sm active:scale-95 group-hover:shadow-md"
+                      title="WhatsApp Mesajı Gönder"
+                    >
+                      <MessageSquare size={18} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {selectedCustomerForWhatsApp && (
+        <WhatsAppModal 
+          isOpen={!!selectedCustomerForWhatsApp}
+          onClose={() => setSelectedCustomerForWhatsApp(null)}
+          customer={selectedCustomerForWhatsApp}
+        />
+      )}
     </div>
   );
 }
