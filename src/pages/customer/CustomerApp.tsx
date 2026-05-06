@@ -50,19 +50,18 @@ function CustomerHome() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Zap size={16} className="text-primary-600" />
-              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Global ClubScore</p>
+              <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">CLUBPAY GÜVEN SKORU</p>
             </div>
-            <p className="text-4xl font-black text-slate-900 tracking-tighter">{user.clubScore}<span className="text-slate-300 text-lg font-bold ml-1">/100</span></p>
-            <p className="text-slate-500 text-xs mt-2 font-medium">Toplam {user.totalTransactionsCount} işlem üzerinden hesaplandı.</p>
+            <p className="text-4xl font-black text-slate-900 tracking-tighter">
+              {user.clubScore || 0}<span className="text-slate-300 text-lg font-bold ml-1">/100</span>
+            </p>
+            <p className="text-slate-500 text-[11px] mt-2 font-bold italic text-primary-600">
+              {user.trustLevel} Müşteri
+            </p>
+            <p className="text-slate-400 text-[10px] mt-1 font-medium">Toplam {user.totalTransactionsCount || 0} işlem üzerinden hesaplandı.</p>
           </div>
           <div className="text-right">
-            <span className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border ${
-              user.trustLevel === 'Güvenilir' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-              user.trustLevel === 'Düzenli' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-              'bg-amber-50 text-amber-700 border-amber-100'
-            }`}>
-              {user.trustLevel}
-            </span>
+            <ShieldCheck size={32} className="text-primary-600/20" />
           </div>
         </div>
       </div>
@@ -70,25 +69,31 @@ function CustomerHome() {
       {/* Shared Network Control */}
       <div className="mb-8">
         <div className="flex justify-between items-end mb-4">
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Shared Merchant Network</h2>
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Esnaf Güven Ağı</h2>
         </div>
         <div className={`rounded-3xl p-6 border transition-all ${user.networkOptIn ? 'bg-primary-600 border-primary-500 text-white shadow-premium' : 'bg-white border-slate-100 text-slate-900 shadow-card'}`}>
           <div className="flex justify-between items-start mb-4">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${user.networkOptIn ? 'bg-white/20' : 'bg-slate-100 text-slate-600'}`}>
               <Globe size={24} />
             </div>
-            <button 
-              onClick={toggleNetworkOptIn}
-              className={`w-12 h-6 rounded-full relative transition-colors ${user.networkOptIn ? 'bg-emerald-400' : 'bg-slate-200'}`}
-            >
-              <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${user.networkOptIn ? 'right-1' : 'left-1'}`}></div>
-            </button>
+            <div className="flex flex-col items-end gap-2">
+              <button 
+                onClick={toggleNetworkOptIn}
+                className={`w-12 h-6 rounded-full relative transition-colors ${user.networkOptIn ? 'bg-emerald-400' : 'bg-slate-200'}`}
+              >
+                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${user.networkOptIn ? 'right-1' : 'left-1'}`}></div>
+              </button>
+              <span className={`text-[9px] font-black uppercase tracking-widest ${user.networkOptIn ? 'text-white' : 'text-slate-400'}`}>
+                {user.networkOptIn ? 'Ağ paylaşımı açık' : 'Ağ paylaşımı kapalı'}
+              </span>
+            </div>
           </div>
-          <h3 className="font-bold text-lg mb-1">Ağ Görünürlüğü</h3>
+          <h3 className="font-bold text-lg mb-1">Esnaf Güven Ağı</h3>
           <p className={`text-sm font-medium leading-relaxed ${user.networkOptIn ? 'text-primary-100' : 'text-slate-500'}`}>
-            {user.networkOptIn 
-              ? "Profiliniz ClubPay ağındaki diğer esnaflar tarafından güven analizi için görülebilir. Daha yüksek limitlere daha hızlı ulaşabilirsiniz." 
-              : "Profiliniz diğer esnaflara kapalı. Sadece işlem yaptığınız mevcut esnaflar verilerinizi görebilir."}
+            Açık olduğunda, diğer ClubPay esnafları yalnızca güven seviyenizi ve genel ödeme alışkanlığınızı görebilir. 
+            <span className="block mt-2 font-bold border-t border-white/10 pt-2">
+              🔒 Borç tutarlarınız ve hangi esnafa borcunuz olduğu diğer işletmelerle kesinlikle paylaşılmaz.
+            </span>
           </p>
         </div>
       </div>

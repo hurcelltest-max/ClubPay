@@ -81,8 +81,8 @@ export default function MerchantCustomers() {
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{customer.name}</p>
                       {customer.networkOptIn && (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-md text-[10px] font-bold border border-indigo-100" title="Shared Network Üyesi">
-                          <Globe size={10} /> Verified
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-md text-[10px] font-bold border border-indigo-100" title="Esnaf Güven Ağı Üyesi">
+                          <Globe size={10} /> Doğrulanmış
                         </span>
                       )}
                     </div>
@@ -107,7 +107,7 @@ export default function MerchantCustomers() {
                       {customer.networkOptIn ? (
                         <>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-black text-slate-900">{customer.clubScore}</span>
+                            <span className="text-sm font-black text-slate-900">{customer.clubScore || 0}</span>
                             <span className="text-[10px] font-bold text-slate-400">/100</span>
                           </div>
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
@@ -119,7 +119,7 @@ export default function MerchantCustomers() {
                           </span>
                         </>
                       ) : (
-                        <span className="text-[10px] font-bold text-slate-300 italic">Ağ Dışı (Private)</span>
+                        <span className="text-[10px] font-bold text-slate-300 italic">Ağ paylaşımı kapalı</span>
                       )}
                     </div>
                   </td>
