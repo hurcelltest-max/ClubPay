@@ -17,6 +17,7 @@ export type DemoUser = {
   trustLevel: 'Güvenilir' | 'Düzenli' | 'Orta Risk' | 'Dikkatli';
   networkOptIn: boolean;
   totalTransactionsCount: number;
+  lastWhatsAppDate?: string;
 };
 
 export type Transaction = {
@@ -48,6 +49,7 @@ interface DemoState {
   logout: () => void;
   resetDemo: () => void;
   toggleNetworkOptIn: () => void;
+  markWhatsAppSent: (customerId: string) => void;
   addSale: (customerId: string, amount: number, type: 'peşin' | 'veresiye' | 'puan_kullanımı', description: string, pointsToUse?: number, dueDate?: string) => void;
   addPayment: (customerId: string, amount: number) => void;
   addCampaign: (campaign: Omit<Campaign, 'id' | 'status'>) => void;
@@ -136,6 +138,14 @@ export const useDemoStore = create<DemoState>()(
             toast('Ağ görünürlüğü kapatıldı. Profiliniz artık sadece işlem yaptığınız esnaflar tarafından görülebilir.', { icon: '🔒' });
           }
         }
+      },
+
+      markWhatsAppSent: (customerId) => {
+        set((state) => ({
+          customers: state.customers.map(c => 
+            c.id === customerId ? { ...c, lastWhatsAppDate: new Date().toISOString() } : c
+          )
+        }));
       },
 
       resetDemo: () => {

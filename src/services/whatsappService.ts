@@ -7,33 +7,45 @@ export type WhatsAppTemplate = {
 export const WHATSAPP_TEMPLATES: WhatsAppTemplate[] = [
   {
     id: 'credit_reminder',
-    title: 'Veresiye Hatırlatma',
-    message: (data) => `Selamlar ${data.customerName}, ben ${data.merchantName}. 
-Müsait olduğunda güncel veresiye borcun olan ₺${data.amount} için bir ödeme yapabilir misin? İyi çalışmalar!`,
-  },
-  {
-    id: 'thank_you',
-    title: 'Teşekkür Mesajı',
-    message: (data) => `Merhaba ${data.customerName}, bugünkü alışverişin için teşekkür ederiz! 
-ClubPay üzerinden ${data.points} yeni puan kazandın. Tekrar görüşmek üzere!`,
-  },
-  {
-    id: 'campaign',
-    title: 'Kampanya Bildirimi',
-    message: (data) => `Selam ${data.customerName}! ${data.merchantName}'de sana özel bir kampanya var: ${data.campaignTitle}. 
-Bekleriz!`,
+    title: 'Nazik Hatırlatma',
+    message: (data) => `Selamlar ${data.customerName}, ben ${data.merchantName}. Müsait olduğunda bir ara çayımızı içmeye bekleriz, bu arada güncel veresiye durumunu (₺${data.amount}) da hatırlatmak istedim. Selamlar! 🙂
+
+*ClubPay Güven Ağı*`,
   },
   {
     id: 'payment_received',
     title: 'Tahsilat Teşekkür',
-    message: (data) => `Merhaba ${data.customerName}, ₺${data.amount} tutarındaki ödemen için teşekkür ederiz. 
-Güncel borç bakiyen: ₺${data.remainingBalance}. İyi günler!`,
+    message: (data) => `Merhaba ${data.customerName}, ₺${data.amount} tutarındaki ödemeni aldık, çok teşekkürler. Güncel bakiyen: ₺${data.remainingBalance}. İyi günler dilerim! 👍
+
+*ClubPay Güven Ağı*`,
+  },
+  {
+    id: 'thank_you',
+    title: 'Puan Bildirimi',
+    message: (data) => `Selam ${data.customerName}! Bugünkü alışverişinle tam ${data.points} yeni puan kazandın. Biriktirdiğin puanları bir sonraki gelişinde indirim olarak kullanabilirsin. Görüşmek üzere! 🎉
+
+*ClubPay ile Kazanıyorsunuz*`,
+  },
+  {
+    id: 'campaign',
+    title: 'Özel Fırsat',
+    message: (data) => `Merhaba ${data.customerName}, sana özel bir haberim var! ${data.merchantName}'de şu an "${data.campaignTitle}" fırsatımız başladı. Geldiğinde mutlaka hatırlat. Bekliyoruz! 🙂
+
+*ClubPay Ayrıcalığı*`,
+  },
+  {
+    id: 'loyal_customer',
+    title: 'Sadık Müşteri Teşekkürü',
+    message: (data) => `Değerli ${data.customerName}, bizi tercih ettiğin için çok teşekkürler. Seni mahallemizin sadık müşterisi olarak görmek bizi mutlu ediyor. Nice alışverişlere! 🤝
+
+*ClubPay Sadakat Programı*`,
   },
   {
     id: 'birthday',
     title: 'Doğum Günü Kutlaması',
-    message: (data) => `Nice senelere ${data.customerName}! Doğum günün kutlu olsun. 
-Bugüne özel ${data.merchantName}'de seni bir sürpriz bekliyor! 🎂`,
+    message: (data) => `Nice mutlu senelere ${data.customerName}! Doğum günün kutlu olsun. Bugüne özel seni ${data.merchantName}'de küçük bir sürpriz bekliyor, uğramayı unutma! 🎂🥳
+
+*ClubPay ile Nice Yıllara*`,
   }
 ];
 
