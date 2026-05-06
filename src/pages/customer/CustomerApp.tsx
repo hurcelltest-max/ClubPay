@@ -1,12 +1,12 @@
 import React from 'react';
-import { Bell, Gift, CreditCard, QrCode, Home as HomeIcon } from 'lucide-react';
+import { Bell, Gift, CreditCard, QrCode, Home as HomeIcon, Globe, ShieldCheck, Zap } from 'lucide-react';
 import { useDemoStore } from '../../store/demoStore';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
 import CustomerWallet from './CustomerWallet';
 import CustomerQR from './CustomerQR';
 
 function CustomerHome() {
-  const { user, campaigns } = useDemoStore();
+  const { user, campaigns, toggleNetworkOptIn } = useDemoStore();
 
   if (!user) return null;
 
@@ -16,7 +16,13 @@ function CustomerHome() {
       <div className="flex justify-between items-center mb-8 pt-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Merhaba, {user.name.split(' ')[0]} 👋</h1>
-          <p className="text-slate-500 text-sm font-medium">{user.riskLevel} Seviye Üye</p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-slate-500 text-sm font-medium">{user.riskLevel} Seviye Üye</span>
+            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span className="flex items-center gap-1 text-primary-600 text-xs font-bold bg-primary-50 px-2 py-0.5 rounded-full border border-primary-100">
+              <ShieldCheck size={12} /> {user.trustLevel}
+            </span>
+          </div>
         </div>
         <button className="w-10 h-10 bg-white rounded-full shadow-sm border border-slate-100 flex items-center justify-center relative hover:bg-slate-50 transition-colors">
           <Bell size={20} className="text-slate-700" />
@@ -25,7 +31,7 @@ function CustomerHome() {
       </div>
 
       {/* Main Cards - Glassmorphism touch */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-3xl p-5 text-white shadow-premium relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-xl -mr-10 -mt-10"></div>
           <p className="text-primary-100 text-xs mb-2 font-bold uppercase tracking-wider">Kazanılan Puan</p>
@@ -34,6 +40,56 @@ function CustomerHome() {
         <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-card hover:shadow-premium transition-shadow">
           <p className="text-slate-400 text-xs mb-2 font-bold uppercase tracking-wider">Kalan Limit (₺)</p>
           <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{(user.creditLimit - user.usedCredit).toLocaleString()}</p>
+        </div>
+      </div>
+
+      {/* ClubScore Global Trust Card */}
+      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-card mb-8 relative overflow-hidden group hover:shadow-premium transition-all">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary-100 transition-colors"></div>
+        <div className="flex justify-between items-start relative z-10">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Zap size={16} className="text-primary-600" />
+              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Global ClubScore</p>
+            </div>
+            <p className="text-4xl font-black text-slate-900 tracking-tighter">{user.clubScore}<span className="text-slate-300 text-lg font-bold ml-1">/100</span></p>
+            <p className="text-slate-500 text-xs mt-2 font-medium">Toplam {user.totalTransactionsCount} işlem üzerinden hesaplandı.</p>
+          </div>
+          <div className="text-right">
+            <span className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border ${
+              user.trustLevel === 'Güvenilir' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+              user.trustLevel === 'Düzenli' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+              'bg-amber-50 text-amber-700 border-amber-100'
+            }`}>
+              {user.trustLevel}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Shared Network Control */}
+      <div className="mb-8">
+        <div className="flex justify-between items-end mb-4">
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Shared Merchant Network</h2>
+        </div>
+        <div className={`rounded-3xl p-6 border transition-all ${user.networkOptIn ? 'bg-primary-600 border-primary-500 text-white shadow-premium' : 'bg-white border-slate-100 text-slate-900 shadow-card'}`}>
+          <div className="flex justify-between items-start mb-4">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${user.networkOptIn ? 'bg-white/20' : 'bg-slate-100 text-slate-600'}`}>
+              <Globe size={24} />
+            </div>
+            <button 
+              onClick={toggleNetworkOptIn}
+              className={`w-12 h-6 rounded-full relative transition-colors ${user.networkOptIn ? 'bg-emerald-400' : 'bg-slate-200'}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${user.networkOptIn ? 'right-1' : 'left-1'}`}></div>
+            </button>
+          </div>
+          <h3 className="font-bold text-lg mb-1">Ağ Görünürlüğü</h3>
+          <p className={`text-sm font-medium leading-relaxed ${user.networkOptIn ? 'text-primary-100' : 'text-slate-500'}`}>
+            {user.networkOptIn 
+              ? "Profiliniz ClubPay ağındaki diğer esnaflar tarafından güven analizi için görülebilir. Daha yüksek limitlere daha hızlı ulaşabilirsiniz." 
+              : "Profiliniz diğer esnaflara kapalı. Sadece işlem yaptığınız mevcut esnaflar verilerinizi görebilir."}
+          </p>
         </div>
       </div>
 

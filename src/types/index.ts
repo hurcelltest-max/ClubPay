@@ -16,6 +16,23 @@ export interface Merchant {
   created_at: string;
 }
 
+export type DemoUser = {
+  id: string;
+  name: string;
+  role: 'customer' | 'merchant' | 'admin';
+  phone?: string;
+  points: number;
+  creditLimit: number;
+  usedCredit: number;
+  riskLevel: 'Bronz' | 'Gümüş' | 'Altın';
+  qrCode: string;
+  // Shared Network Layer
+  clubScore: number;
+  trustLevel: 'Güvenilir' | 'Düzenli' | 'Orta Risk' | 'Dikkatli';
+  networkOptIn: boolean;
+  totalTransactionsCount: number;
+};
+
 export interface Customer {
   id: string;
   merchant_id: string;

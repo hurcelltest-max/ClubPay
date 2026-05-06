@@ -12,6 +12,11 @@ export type DemoUser = {
   usedCredit: number;
   riskLevel: 'Bronz' | 'Gümüş' | 'Altın';
   qrCode: string;
+  // Shared Network Layer
+  clubScore: number;
+  trustLevel: 'Güvenilir' | 'Düzenli' | 'Orta Risk' | 'Dikkatli';
+  networkOptIn: boolean;
+  totalTransactionsCount: number;
 };
 
 export type Transaction = {
@@ -42,18 +47,34 @@ interface DemoState {
   login: (role: 'customer' | 'merchant' | 'admin') => void;
   logout: () => void;
   resetDemo: () => void;
+  toggleNetworkOptIn: () => void;
   addSale: (customerId: string, amount: number, type: 'peşin' | 'veresiye' | 'puan_kullanımı', description: string, pointsToUse?: number, dueDate?: string) => void;
   addPayment: (customerId: string, amount: number) => void;
   addCampaign: (campaign: Omit<Campaign, 'id' | 'status'>) => void;
-  addCustomer: (customer: Omit<DemoUser, 'id' | 'qrCode' | 'role' | 'usedCredit' | 'points' | 'riskLevel'>) => void;
+  addCustomer: (customer: Omit<DemoUser, 'id' | 'qrCode' | 'role' | 'usedCredit' | 'points' | 'riskLevel' | 'clubScore' | 'trustLevel' | 'networkOptIn' | 'totalTransactionsCount'>) => void;
 }
 
 const INITIAL_CUSTOMERS: DemoUser[] = [
-  { id: 'c1', name: 'Ahmet Yılmaz', role: 'customer', phone: '0532 111 22 33', points: 1450, usedCredit: 850, creditLimit: 5000, riskLevel: 'Gümüş', qrCode: 'CP-1001-A' },
-  { id: 'c2', name: 'Ayşe Demir', role: 'customer', phone: '0533 222 33 44', points: 300, usedCredit: 0, creditLimit: 2000, riskLevel: 'Altın', qrCode: 'CP-1002-B' },
-  { id: 'c3', name: 'Mehmet Kaya', role: 'customer', phone: '0555 333 44 55', points: 0, usedCredit: 4200, creditLimit: 5000, riskLevel: 'Bronz', qrCode: 'CP-1003-C' },
-  { id: 'c4', name: 'Zeynep Arslan', role: 'customer', phone: '0544 444 55 66', points: 2500, usedCredit: 150, creditLimit: 10000, riskLevel: 'Altın', qrCode: 'CP-1004-D' },
-  { id: 'c5', name: 'Caner Özcan', role: 'customer', phone: '0505 555 66 77', points: 85, usedCredit: 1250, creditLimit: 3000, riskLevel: 'Gümüş', qrCode: 'CP-1005-E' },
+  { 
+    id: 'c1', name: 'Ahmet Yılmaz', role: 'customer', phone: '0532 111 22 33', points: 1450, usedCredit: 850, creditLimit: 5000, riskLevel: 'Gümüş', qrCode: 'CP-1001-A',
+    clubScore: 88, trustLevel: 'Güvenilir', networkOptIn: true, totalTransactionsCount: 124
+  },
+  { 
+    id: 'c2', name: 'Ayşe Demir', role: 'customer', phone: '0533 222 33 44', points: 300, usedCredit: 0, creditLimit: 2000, riskLevel: 'Altın', qrCode: 'CP-1002-B',
+    clubScore: 95, trustLevel: 'Güvenilir', networkOptIn: true, totalTransactionsCount: 56
+  },
+  { 
+    id: 'c3', name: 'Mehmet Kaya', role: 'customer', phone: '0555 333 44 55', points: 0, usedCredit: 4200, creditLimit: 5000, riskLevel: 'Bronz', qrCode: 'CP-1003-C',
+    clubScore: 42, trustLevel: 'Dikkatli', networkOptIn: false, totalTransactionsCount: 210
+  },
+  { 
+    id: 'c4', name: 'Zeynep Arslan', role: 'customer', phone: '0544 444 55 66', points: 2500, usedCredit: 150, creditLimit: 10000, riskLevel: 'Altın', qrCode: 'CP-1004-D',
+    clubScore: 92, trustLevel: 'Güvenilir', networkOptIn: true, totalTransactionsCount: 89
+  },
+  { 
+    id: 'c5', name: 'Caner Özcan', role: 'customer', phone: '0505 555 66 77', points: 85, usedCredit: 1250, creditLimit: 3000, riskLevel: 'Gümüş', qrCode: 'CP-1005-E',
+    clubScore: 68, trustLevel: 'Orta Risk', networkOptIn: true, totalTransactionsCount: 45
+  },
 ];
 
 const INITIAL_CAMPAIGNS: Campaign[] = [
@@ -85,10 +106,16 @@ export const useDemoStore = create<DemoState>()(
           set({ user: get().customers[0] }); // Ahmet Yılmaz
           toast.success('Müşteri girişi yapıldı. Hoş geldin Ahmet!');
         } else if (role === 'merchant') {
-          set({ user: { id: 'm1', name: 'HurCELL İletişim', role: 'merchant', points: 0, creditLimit: 0, usedCredit: 0, riskLevel: 'Altın', qrCode: '' } });
+          set({ user: { 
+            id: 'm1', name: 'HurCELL İletişim', role: 'merchant', points: 0, creditLimit: 0, usedCredit: 0, riskLevel: 'Altın', qrCode: '',
+            clubScore: 0, trustLevel: 'Güvenilir', networkOptIn: false, totalTransactionsCount: 0
+          } });
           toast.success('İşletme paneli açıldı. İyi mesailer!');
         } else {
-          set({ user: { id: 'a1', name: 'ClubPay Yönetim', role: 'admin', points: 0, creditLimit: 0, usedCredit: 0, riskLevel: 'Altın', qrCode: '' } });
+          set({ user: { 
+            id: 'a1', name: 'ClubPay Yönetim', role: 'admin', points: 0, creditLimit: 0, usedCredit: 0, riskLevel: 'Altın', qrCode: '',
+            clubScore: 0, trustLevel: 'Güvenilir', networkOptIn: false, totalTransactionsCount: 0
+          } });
           toast.success('Sistem yöneticisi girişi başarılı.');
         }
       },
@@ -96,6 +123,19 @@ export const useDemoStore = create<DemoState>()(
       logout: () => {
         set({ user: null });
         toast('Güle güle, tekrar görüşmek üzere!', { icon: '👋' });
+      },
+
+      toggleNetworkOptIn: () => {
+        const { user } = get();
+        if (user && user.role === 'customer') {
+          const newStatus = !user.networkOptIn;
+          set({ user: { ...user, networkOptIn: newStatus } });
+          if (newStatus) {
+            toast.success('ClubPay ağına katıldınız! Profiliniz diğer esnaflar tarafından güven analizi için görülebilir.', { icon: '🌐' });
+          } else {
+            toast('Ağ görünürlüğü kapatıldı. Profiliniz artık sadece işlem yaptığınız esnaflar tarafından görülebilir.', { icon: '🔒' });
+          }
+        }
       },
 
       resetDemo: () => {
@@ -216,7 +256,11 @@ export const useDemoStore = create<DemoState>()(
             points: 0,
             usedCredit: 0,
             riskLevel: 'Gümüş',
-            creditLimit: 2500
+            creditLimit: 2500,
+            clubScore: 50,
+            trustLevel: 'Düzenli',
+            networkOptIn: false,
+            totalTransactionsCount: 0
           };
           toast.success(`${customerData.name} dijital kartıyla birlikte sisteme kaydedildi.`, { icon: '🤝' });
           return { customers: [...state.customers, newCustomer] };

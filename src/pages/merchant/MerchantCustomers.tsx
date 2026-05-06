@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, PlusCircle } from 'lucide-react';
+import { Search, Filter, PlusCircle, Globe, ShieldCheck } from 'lucide-react';
 import { useDemoStore } from '../../store/demoStore';
 
 export default function MerchantCustomers() {
@@ -70,15 +70,22 @@ export default function MerchantCustomers() {
                 <th className="p-6 font-extrabold border-b border-slate-100">Müşteri Bilgisi</th>
                 <th className="p-6 font-extrabold border-b border-slate-100">İletişim</th>
                 <th className="p-6 font-extrabold border-b border-slate-100 text-right">Puan Bakiyesi</th>
-                <th className="p-6 font-extrabold border-b border-slate-100 text-right">Limit / Güncel Borç</th>
-                <th className="p-6 font-extrabold border-b border-slate-100 text-center">Risk Grubu</th>
+                <th className="p-6 font-extrabold border-b border-slate-100 text-right">Limit / Borç</th>
+                <th className="p-6 font-extrabold border-b border-slate-100 text-center">Global Güven (Network)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {customers.map(customer => (
                 <tr key={customer.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="p-6">
-                    <p className="font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{customer.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{customer.name}</p>
+                      {customer.networkOptIn && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-md text-[10px] font-bold border border-indigo-100" title="Shared Network Üyesi">
+                          <Globe size={10} /> Verified
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-400 mt-1 font-mono">{customer.qrCode}</p>
                   </td>
                   <td className="p-6 text-slate-600 text-sm font-medium">{customer.phone}</td>
@@ -88,21 +95,33 @@ export default function MerchantCustomers() {
                     </span>
                   </td>
                   <td className="p-6 text-right">
-                    <p className="font-bold text-slate-400 text-xs">Limit: ₺{customer.creditLimit.toLocaleString()}</p>
+                    <p className="font-bold text-slate-400 text-xs">₺{customer.creditLimit.toLocaleString()}</p>
                     {customer.usedCredit > 0 ? (
-                      <p className="text-sm font-extrabold text-orange-600 mt-1">Borç: ₺{customer.usedCredit.toLocaleString()}</p>
+                      <p className="text-sm font-extrabold text-orange-600 mt-1">₺{customer.usedCredit.toLocaleString()}</p>
                     ) : (
                       <p className="text-sm font-extrabold text-emerald-600 mt-1">Borç Yok</p>
                     )}
                   </td>
-                  <td className="p-6 text-center">
-                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border ${
-                      customer.riskLevel === 'Bronz' ? 'bg-red-50 text-red-700 border-red-100' :
-                      customer.riskLevel === 'Gümüş' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                      'bg-emerald-50 text-emerald-700 border-emerald-100'
-                    }`}>
-                      {customer.riskLevel}
-                    </span>
+                  <td className="p-6">
+                    <div className="flex flex-col items-center gap-1">
+                      {customer.networkOptIn ? (
+                        <>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-black text-slate-900">{customer.clubScore}</span>
+                            <span className="text-[10px] font-bold text-slate-400">/100</span>
+                          </div>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                            customer.trustLevel === 'Güvenilir' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                            customer.trustLevel === 'Düzenli' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                            'bg-amber-50 text-amber-700 border-amber-100'
+                          }`}>
+                            {customer.trustLevel}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-[10px] font-bold text-slate-300 italic">Ağ Dışı (Private)</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
