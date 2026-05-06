@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary-600: 37 99 235;
+  }
+  
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans antialiased selection:bg-primary-500 selection:text-white;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth scrolling for anchor links */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Premium Card Style */
+  .premium-card {
+    @apply bg-white border border-slate-100 rounded-[2rem] shadow-card hover:shadow-premium transition-all duration-300;
+  }
+
+  /* Improved Touch Targets for Mobile */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  /* Safe Area Padding for Mobile Navs */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Hide scrollbar for cleaner UI */
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Glassmorphism utility */
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20;
+  }
+}
+
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+  }
+}

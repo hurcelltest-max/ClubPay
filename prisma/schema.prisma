@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  role          String   @default("CUSTOMER") // CUSTOMER, MERCHANT, ADMIN
+  name          String?
+  phone         String?  @unique
+  email         String?  @unique
+  passwordHash  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  merchant      Merchant?
+  customers     Customer[]
+}
+
+model Merchant {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id])
+  storeName          String
+  slug               String?  @unique
+  address            String?
+  pointsRate         Float    @default(1.0) // Müşteriye verilecek puan oranı (Örn: 1.0 = %1)
+  subscriptionStatus String   @default("TRIAL") // TRIAL, ACTIVE, EXPIRED
+  planId             String?
+  createdAt          DateTime @default(now())
+
+  customers          Customer[]
+  campaigns          Campaign[]
+}
+
+model Customer {
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  merchantId    String
+  merchant      Merchant @relation(fields: [merchantId], references: [id])
+  name          String?  // Müşterinin mağazadaki ismi
+  phone         String?  // Müşterinin mağazadaki telefonu
+  qrCode        String   @unique @default(uuid())
+  totalPoints   Int      @default(0)
+  creditLimit   Float    @default(0)
+  usedCredit    Float    @default(0)
+  riskLevel     String   @default("BRONZE") // BRONZE, SILVER, GOLD
+  loyaltyLevel  String   @default("STANDARD") // STANDARD, SILVER, GOLD, VIP
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  pointsTransactions PointsTransaction[]
+  creditTransactions CreditTransaction[]
+  orders             Order[]
+}
+
+model PointsTransaction {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  amount      Int
+  type        String   // EARN, REDEEM
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model CreditTransaction {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  amount      Float
+  type        String   // DEBT, PAYMENT
+  description String?  // Satış kalemleri veya tahsilat detayı
+  dueDate     DateTime?
+  status      String   @default("PENDING") // PENDING, PAID, OVERDUE
+  createdAt   DateTime @default(now())
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  merchantId  String
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  totalAmount Float
+  paidAmount  Float
+  creditUsed  Float    @default(0)
+  pointsUsed  Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Campaign {
+  id             String   @id @default(cuid())
+  merchantId     String
+  merchant       Merchant @relation(fields: [merchantId], references: [id])
+  title          String
+  description    String?
+  discountType   String   // PERCENTAGE, FIXED
+  discountValue  Float
+  startDate      DateTime?
+  endDate        DateTime?
+  targetSegment  String?
+  createdAt      DateTime @default(now())
+}
