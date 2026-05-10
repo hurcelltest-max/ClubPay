@@ -27,6 +27,15 @@ Proje Vercel üzerinde host edilmektedir.
 2. Her `main` branch push'unda Vercel otomatik olarak CI/CD sürecini çalıştırır.
 3. React Router (SPA) kaynaklı Vercel 404 hatalarını önlemek için projedeki `vercel.json` rewrite kuralları devrededir.
 
+## App Store / Google Play Future Preparation
+
+ClubPay, sadece bir web sitesi değil, Store'lara çıkmaya hazır bir altyapıya sahiptir.
+
+- **PWA & TWA Ready:** Mevcut altyapı, Google Play için Trusted Web Activity (TWA) ve App Store için PWA Builder / WKWebView katmanları ile kolayca native paket haline getirilebilir.
+- **Manifest & Metadata:** `manifest.json` ve `index.html` üzerindeki PWA tanımlamaları (maskable icons, theme colors, status bar styles) en yüksek mobil uyumluluk standartlarına göre yapılandırılmıştır.
+- **Safe Area Handling:** iOS çentik ve alt navigasyon çubuğu korumaları (viewport-fit=cover ve pb-safe) CSS katmanında hazırdır.
+- **Standalone Experience:** Uygulama ana ekrana eklendiğinde tarayıcı arayüzü olmadan, tam ekran (standalone) native uygulama deneyimi sunar.
+
 ## Geliştirme Ortamı Kurulumu
 
 ```bash

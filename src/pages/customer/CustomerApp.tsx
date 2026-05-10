@@ -145,18 +145,18 @@ function BottomNav() {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-100 pb-safe z-50">
       <div className="flex justify-around items-center h-20 px-6 max-w-md mx-auto">
-        <Link to={`${basePath}`} className={`flex flex-col items-center gap-1.5 p-2 transition-colors ${isActive(basePath) || isActive(`${basePath}/`) ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-          <HomeIcon size={24} className={isActive(basePath) || isActive(`${basePath}/`) ? 'stroke-[2.5px]' : ''} />
+        <Link to={`${basePath}`} className={`flex flex-col items-center gap-1.5 p-2 transition-all duration-300 active:scale-95 ${isActive(basePath) || isActive(`${basePath}/`) ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+          <HomeIcon size={24} className={`transition-all duration-300 ${isActive(basePath) || isActive(`${basePath}/`) ? 'stroke-[2.5px] drop-shadow-sm' : ''}`} />
           <span className="text-[10px] font-bold">Ana Sayfa</span>
         </Link>
-        <Link to={`${basePath}/qr`} className={`flex flex-col items-center gap-1.5 p-2 transition-colors ${isActive(`${basePath}/qr`) ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-premium transition-transform active:scale-95 ${isActive(`${basePath}/qr`) ? 'bg-primary-600 text-white' : 'bg-slate-900 text-white'}`}>
-            <QrCode size={24} />
+        <Link to={`${basePath}/qr`} className={`flex flex-col items-center gap-1.5 p-2 transition-all duration-300 ${isActive(`${basePath}/qr`) ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center -mt-8 shadow-float transition-all duration-300 active:scale-90 hover:-translate-y-1 ${isActive(`${basePath}/qr`) ? 'bg-primary-600 text-white' : 'bg-slate-900 text-white'}`}>
+            <QrCode size={26} />
           </div>
           <span className="text-[10px] font-bold mt-1">QR Kartım</span>
         </Link>
-        <Link to={`${basePath}/wallet`} className={`flex flex-col items-center gap-1.5 p-2 transition-colors ${isActive(`${basePath}/wallet`) ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-          <CreditCard size={24} className={isActive(`${basePath}/wallet`) ? 'stroke-[2.5px]' : ''} />
+        <Link to={`${basePath}/wallet`} className={`flex flex-col items-center gap-1.5 p-2 transition-all duration-300 active:scale-95 ${isActive(`${basePath}/wallet`) ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+          <CreditCard size={24} className={`transition-all duration-300 ${isActive(`${basePath}/wallet`) ? 'stroke-[2.5px] drop-shadow-sm' : ''}`} />
           <span className="text-[10px] font-bold">Cüzdan</span>
         </Link>
       </div>

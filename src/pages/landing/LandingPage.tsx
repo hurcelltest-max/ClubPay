@@ -159,15 +159,15 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Nasıl Çalışır?</h2>
-              <p className="text-lg text-slate-400">Üç basit adımda modern finans yönetimine geçin.</p>
+              <p className="text-lg text-slate-400">Üç basit adımda defterleri dijitale taşıyın.</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
               <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-0.5 bg-slate-800"></div>
               {[
-                { step: "1", title: "Müşterini Kaydet", desc: "Saniyeler içinde müşterini sisteme ekle. Sistem otomatik QR kimlik oluştursun." },
-                { step: "2", title: "Veresiye & Puan Yönet", desc: "Kasada satış yaparken hesaba yaz, tahsilat yap veya sadakat puanı yükle." },
-                { step: "3", title: "Satışlarını Büyüt", desc: "Özel kampanyalarla müşterini mağazana geri çek ve cironu katla." }
+                { step: "1", title: "Müşteriyi Tanı", desc: "Saniyeler içinde müşteriyi kaydet. Telefonundaki QR kart ile her geldiğinde onu hemen tanı." },
+                { step: "2", title: "Kasada Hızlan", desc: "İster peşin ister veresiye, 10 saniyenin altında satışı tamamla. Puan kazandır veya tahsilat yap." },
+                { step: "3", title: "Hatırlat & Sat", desc: "Uzun süre gelmeyeni WhatsApp'tan tek tıkla çağır. Bakiye limitini otomatik yönet." }
               ].map((item, i) => (
                 <div key={i} className="relative z-10 text-center">
                   <div className="w-24 h-24 mx-auto bg-primary-600 rounded-full flex items-center justify-center text-3xl font-extrabold mb-8 shadow-premium border-8 border-slate-900">
@@ -181,15 +181,37 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 4. Merchant Categories */}
+        {/* 4. Pilot İşletme Vitrini */}
         <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-12">Hangi İşletmeler Kullanabilir?</h2>
-            <div className="flex flex-wrap justify-center gap-4">
-              {['📱 Telefoncular', '☕ Cafeler', '🛒 Marketler', '🥖 Bakkallar', '🥬 Manavlar', '✂️ Kuaförler', '🔧 Tamirciler'].map(cat => (
-                <div key={cat} className="px-6 py-3 bg-slate-50 border border-slate-100 rounded-full text-lg font-bold text-slate-700 shadow-sm hover:border-primary-300 hover:text-primary-600 transition-colors cursor-default">
-                  {cat}
-                </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold text-xs uppercase tracking-widest mb-4 border border-emerald-100">
+              Canlı Demolar
+            </div>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Gerçek İşletmelerde İnceleyin</h2>
+            <p className="text-lg text-slate-500 mb-12 max-w-2xl mx-auto">ClubPay'in farklı işletmelerdeki müşteri deneyimini canlı olarak test edin.</p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {[
+                { name: 'HurCELL İletişim', slug: 'hurcell', icon: '📱', color: 'bg-blue-500', desc: 'Telefon & Aksesuar' },
+                { name: 'Jum Burger', slug: 'jum-burger', icon: '🍔', color: 'bg-orange-500', desc: 'Cafe & Restoran' },
+                { name: 'Demo Market', slug: 'demo-market', icon: '🛒', color: 'bg-emerald-500', desc: 'Perakende & Bakkal' }
+              ].map(shop => (
+                <a 
+                  key={shop.slug} 
+                  href={`/${shop.slug}`}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="group block p-6 bg-slate-50 border border-slate-100 rounded-3xl text-left hover:bg-white hover:shadow-xl hover:border-slate-200 transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div className={`w-14 h-14 ${shop.color} text-white rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm group-hover:scale-110 transition-transform`}>
+                    {shop.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">{shop.name}</h3>
+                  <p className="text-sm font-medium text-slate-500 flex items-center justify-between">
+                    {shop.desc}
+                    <ArrowRight size={16} className="text-slate-300 group-hover:text-primary-600 transition-colors" />
+                  </p>
+                </a>
               ))}
             </div>
           </div>

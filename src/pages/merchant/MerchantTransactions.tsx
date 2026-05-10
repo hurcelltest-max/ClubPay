@@ -63,7 +63,7 @@ export default function MerchantTransactions() {
   };
 
   return (
-    <div className="animate-in fade-in duration-500">
+    <div className="animate-in fade-in duration-150">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Satış & Tahsilat</h1>
         <p className="text-slate-500 mt-1 font-medium">Veresiye satışlarınızı ve tahsilatlarınızı yönetin</p>
@@ -217,7 +217,7 @@ export default function MerchantTransactions() {
               </div>
 
               {saleType === 'veresiye' && (
-                <div className="animate-in slide-in-from-top-2 duration-300">
+                <div className="animate-in fade-in duration-150">
                   <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Son Ödeme Tarihi</label>
                   <input 
                     type="date" 
@@ -240,7 +240,7 @@ export default function MerchantTransactions() {
                 />
               </div>
 
-              <div className="animate-in fade-in zoom-in-95 duration-300">
+              <div className="animate-in fade-in duration-150">
                 {saleType === 'peşin' && (
                   <div className="bg-emerald-50 border border-emerald-100 text-emerald-700 p-5 rounded-2xl text-sm font-bold flex items-center gap-3">
                     <Zap size={18} /> Müşteri bu işlemden %10 puan kazanacaktır.

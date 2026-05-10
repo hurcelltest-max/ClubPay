@@ -16,21 +16,23 @@ export default function CustomerQR() {
         </p>
       </div>
 
-      <div className="bg-white p-8 rounded-[2rem] shadow-premium border border-slate-100 flex flex-col items-center w-full max-w-xs relative overflow-hidden group">
+      <div className="bg-white p-8 rounded-[2rem] shadow-premium border border-slate-100 flex flex-col items-center w-full max-w-xs relative overflow-hidden group before:absolute before:inset-0 before:z-0 before:pointer-events-none before:animate-qr-shine">
         {/* Dekoratif çizgiler */}
-        <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-primary-400 via-primary-600 to-purple-600"></div>
+        <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-primary-400 via-primary-600 to-purple-600 z-10"></div>
         
-        <div className="w-56 h-56 bg-slate-50 rounded-2xl mb-8 flex items-center justify-center p-4 border border-slate-100 group-hover:border-primary-200 transition-colors">
-          <div className="w-full h-full border-4 border-dashed border-slate-200 rounded-xl flex flex-col gap-2 items-center justify-center bg-white">
-            <QrCode size={48} className="text-slate-300" strokeWidth={1.5} />
-            <span className="text-slate-400 font-mono text-xs font-bold tracking-widest">{user.qrCode}</span>
+        <div className="relative z-10 w-full flex flex-col items-center">
+          <div className="w-56 h-56 bg-slate-50 rounded-2xl mb-8 flex items-center justify-center p-4 border border-slate-100 group-hover:border-primary-200 transition-colors">
+            <div className="w-full h-full border-4 border-dashed border-slate-200 rounded-xl flex flex-col gap-2 items-center justify-center bg-white shadow-sm">
+              <QrCode size={48} className="text-slate-300" strokeWidth={1.5} />
+              <span className="text-slate-400 font-mono text-xs font-bold tracking-widest">{user.qrCode}</span>
+            </div>
           </div>
-        </div>
-        
-        <p className="text-xl font-extrabold text-slate-900 tracking-tight">{user.name}</p>
-        <div className="flex items-center gap-1.5 mt-2 text-primary-600">
-          <ShieldCheck size={16} />
-          <p className="font-bold text-sm">Doğrulanmış Üye</p>
+          
+          <p className="text-xl font-extrabold text-slate-900 tracking-tight">{user.name}</p>
+          <div className="flex items-center gap-1.5 mt-2 text-primary-600">
+            <ShieldCheck size={16} />
+            <p className="font-bold text-sm">Doğrulanmış Üye</p>
+          </div>
         </div>
       </div>
 
