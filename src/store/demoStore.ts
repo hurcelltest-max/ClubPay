@@ -20,6 +20,14 @@ export type DemoUser = {
   lastWhatsAppDate?: string;
 };
 
+export type Product = {
+  id: string;
+  name: string;
+  category: string;
+  brand?: string;
+  isActive: boolean;
+};
+
 export type Transaction = {
   id: string;
   customerId: string;
@@ -27,6 +35,7 @@ export type Transaction = {
   amount: number;
   type: 'peşin' | 'veresiye' | 'tahsilat' | 'puan_kullanımı';
   description: string;
+  items?: { productId: string; quantity: number }[];
   dueDate?: string;
 };
 
@@ -43,14 +52,18 @@ interface DemoState {
   customers: DemoUser[];
   transactions: Transaction[];
   campaigns: Campaign[];
+  products: Product[];
   
+  // Insights
+  generateCustomerInsights: () => CustomerInsight[];
+
   // Actions
   login: (role: 'customer' | 'merchant' | 'admin') => void;
   logout: () => void;
   resetDemo: () => void;
   toggleNetworkOptIn: () => void;
   markWhatsAppSent: (customerId: string) => void;
-  addSale: (customerId: string, amount: number, type: 'peşin' | 'veresiye' | 'puan_kullanımı', description: string, pointsToUse?: number, dueDate?: string) => void;
+  addSale: (customerId: string, amount: number, type: 'peşin' | 'veresiye' | 'puan_kullanımı', description: string, pointsToUse?: number, dueDate?: string, items?: { productId: string; quantity: number }[]) => void;
   addPayment: (customerId: string, amount: number) => void;
   addCampaign: (campaign: Omit<Campaign, 'id' | 'status'>) => void;
   addCustomer: (customer: Omit<DemoUser, 'id' | 'qrCode' | 'role' | 'usedCredit' | 'points' | 'riskLevel' | 'clubScore' | 'trustLevel' | 'networkOptIn' | 'totalTransactionsCount'>) => void;
@@ -86,14 +99,33 @@ const INITIAL_CAMPAIGNS: Campaign[] = [
   { id: 'camp4', title: 'Erken Ödeme İndirimi', description: 'Veresiye borcunu 15 günden önce ödeyenlere özel puan', discountValue: 50, status: 'aktif' }
 ];
 
-const INITIAL_TRANSACTIONS: Transaction[] = [
-  { id: 't1', customerId: 'c1', date: new Date().toISOString(), amount: 350, type: 'veresiye', description: 'Hızlı Şarj Adaptörü ve Kablo', dueDate: new Date(Date.now() + 864000000).toISOString() },
-  { id: 't2', customerId: 'c1', date: new Date(Date.now() - 86400000).toISOString(), amount: -500, type: 'tahsilat', description: 'Kısmi Nakit Ödeme' },
-  { id: 't3', customerId: 'c4', date: new Date(Date.now() - 172800000).toISOString(), amount: 1200, type: 'peşin', description: 'Bluetooth Kulaklık (JBL)' },
-  { id: 't4', customerId: 'c3', date: new Date(Date.now() - 259200000).toISOString(), amount: 2500, type: 'veresiye', description: 'Ekran Değişimi - iPhone 11', dueDate: new Date(Date.now() + 432000000).toISOString() },
-  { id: 't5', customerId: 'c5', date: new Date(Date.now() - 345600000).toISOString(), amount: 150, type: 'veresiye', description: 'Nano Cam Koruyucu', dueDate: new Date(Date.now() + 259200000).toISOString() },
-  { id: 't6', customerId: 'c2', date: new Date(Date.now() - 432000000).toISOString(), amount: 450, type: 'peşin', description: 'Powerbank 10.000 mAh' },
+const INITIAL_PRODUCTS: Product[] = [
+  { id: 'p1', name: 'Elseve Şampuan', category: 'Kişisel Bakım', brand: 'L\'Oreal', isActive: true },
+  { id: 'p2', name: 'iPhone 13 Kılıfı', category: 'Aksesuar', brand: 'Apple', isActive: true },
+  { id: 'p3', name: 'Filtre Kahve 250g', category: 'Gıda', brand: 'Kurukahveci', isActive: true },
+  { id: 'p4', name: 'Tavuk Burger Menü', category: 'Yemek', brand: 'Ev Yapımı', isActive: true },
+  { id: 'p5', name: 'Islak Mendil', category: 'Temizlik', brand: 'Sleepy', isActive: true },
 ];
+
+const INITIAL_TRANSACTIONS: Transaction[] = [
+  { id: 't1', customerId: 'c1', date: new Date().toISOString(), amount: 350, type: 'veresiye', description: 'Hızlı Şarj Adaptörü ve Kablo', items: [{ productId: 'p2', quantity: 1 }], dueDate: new Date(Date.now() + 864000000).toISOString() },
+  { id: 't2', customerId: 'c1', date: new Date(Date.now() - 86400000).toISOString(), amount: -500, type: 'tahsilat', description: 'Kısmi Nakit Ödeme' },
+  { id: 't3', customerId: 'c4', date: new Date(Date.now() - 172800000).toISOString(), amount: 1200, type: 'peşin', description: 'Bluetooth Kulaklık (JBL)', items: [{ productId: 'p2', quantity: 1 }] },
+  { id: 't4', customerId: 'c3', date: new Date(Date.now() - 259200000).toISOString(), amount: 2500, type: 'veresiye', description: 'Ekran Değişimi - iPhone 11', dueDate: new Date(Date.now() + 432000000).toISOString() },
+  { id: 't5', customerId: 'c5', date: new Date(Date.now() - 345600000).toISOString(), amount: 150, type: 'veresiye', description: 'Nano Cam Koruyucu', items: [{ productId: 'p5', quantity: 2 }], dueDate: new Date(Date.now() + 259200000).toISOString() },
+  { id: 't6', customerId: 'c2', date: new Date(Date.now() - 432000000).toISOString(), amount: 450, type: 'peşin', description: 'Powerbank 10.000 mAh', items: [{ productId: 'p1', quantity: 1 }] },
+  // Eski işlemler (tekrar satın alma döngüsü oluşturmak için)
+  { id: 't7', customerId: 'c1', date: new Date(Date.now() - 30 * 86400000).toISOString(), amount: 120, type: 'peşin', description: 'Elseve Şampuan', items: [{ productId: 'p1', quantity: 1 }] },
+];
+
+export type CustomerInsight = {
+  customerId: string;
+  type: 'repurchase_warning' | 'popular_product' | 'loyal_product';
+  title: string;
+  description: string;
+  productId?: string;
+  productName?: string;
+};
 
 export const useDemoStore = create<DemoState>()(
   persist(
@@ -102,6 +134,67 @@ export const useDemoStore = create<DemoState>()(
       customers: INITIAL_CUSTOMERS,
       transactions: INITIAL_TRANSACTIONS,
       campaigns: INITIAL_CAMPAIGNS,
+      products: INITIAL_PRODUCTS,
+
+      generateCustomerInsights: () => {
+        const insights: CustomerInsight[] = [];
+        const state = get();
+        
+        // Basit analitik: Her müşteri için son alınan ürünleri kontrol et
+        state.customers.forEach(customer => {
+          const customerTx = state.transactions.filter(t => t.customerId === customer.id && t.items && t.items.length > 0);
+          
+          if (customerTx.length > 0) {
+            // En son işlemi al
+            const lastTx = customerTx[0]; // transactions azalan tarih sırasındaysa
+            if (lastTx.items && lastTx.items.length > 0) {
+              const product = state.products.find(p => p.id === lastTx.items![0].productId);
+              if (product) {
+                // Şampuan gibi hızlı tüketim ürünleri için 'tekrar alma' tahmini
+                if (product.category === 'Kişisel Bakım' || product.category === 'Gıda') {
+                  const daysSince = Math.floor((new Date().getTime() - new Date(lastTx.date).getTime()) / (1000 * 3600 * 24));
+                  if (daysSince > 20) {
+                    insights.push({
+                      customerId: customer.id,
+                      type: 'repurchase_warning',
+                      title: 'Tekrar Satın Alma Yaklaştı',
+                      description: `${customer.name}, son ${daysSince} gündür ${product.name} satın almadı.`,
+                      productId: product.id,
+                      productName: product.name
+                    });
+                  }
+                }
+                
+                // Çok satın alınan ürünler için 'sadık ürün' tespiti
+                if (customerTx.length > 2) {
+                   insights.push({
+                      customerId: customer.id,
+                      type: 'loyal_product',
+                      title: 'Sadık Müşteri Ürünü',
+                      description: `${customer.name}, bu ürünü düzenli olarak tercih ediyor.`,
+                      productId: product.id,
+                      productName: product.name
+                   });
+                }
+              }
+            }
+          }
+        });
+
+        // Genel popüler ürün
+        if (state.products.length > 0) {
+           insights.push({
+             customerId: 'all',
+             type: 'popular_product',
+             title: 'Haftanın Popüler Ürünü',
+             description: `${state.products[0].name} son günlerde çok sık tercih ediliyor. Kampanya yapabilirsiniz.`,
+             productId: state.products[0].id,
+             productName: state.products[0].name
+           });
+        }
+
+        return insights;
+      },
 
       login: (role) => {
         if (role === 'customer') {
@@ -158,7 +251,7 @@ export const useDemoStore = create<DemoState>()(
         toast.success('Demo verileri tertemiz hale getirildi!');
       },
 
-      addSale: (customerId, amount, type, description, pointsToUse = 0, dueDate) => {
+      addSale: (customerId, amount, type, description, pointsToUse = 0, dueDate, items) => {
         set((state) => {
           const customerIndex = state.customers.findIndex(c => c.id === customerId);
           if (customerIndex === -1) {
@@ -202,6 +295,7 @@ export const useDemoStore = create<DemoState>()(
             amount,
             type,
             description,
+            items,
             dueDate
           };
 

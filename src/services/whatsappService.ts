@@ -41,6 +41,20 @@ export const WHATSAPP_TEMPLATES: WhatsAppTemplate[] = [
 *ClubPay Sadakat Programı*`,
   },
   {
+    id: 'repurchase_reminder',
+    title: 'Ürün Hatırlatması',
+    message: (data) => `Selam ${data.customerName}! Düzenli kullandığın ${data.productName} için stoklarımızı yeniledik, aklında bulunsun istedim. İhtiyacın olursa dükkana bekleriz. 🙂
+
+*ClubPay Akıllı Asistan*`,
+  },
+  {
+    id: 'product_campaign',
+    title: 'Ürüne Özel Fırsat',
+    message: (data) => `Merhaba ${data.customerName}, daha önce tercih ettiğin ${data.productName} için sadece sana özel küçük bir indirimimiz var. Müsait olduğunda uğrarsan yardımcı olurum! 👍
+
+*ClubPay Ayrıcalığı*`,
+  },
+  {
     id: 'birthday',
     title: 'Doğum Günü Kutlaması',
     message: (data) => `Nice mutlu senelere ${data.customerName}! Doğum günün kutlu olsun. Bugüne özel seni ${data.merchantName}'de küçük bir sürpriz bekliyor, uğramayı unutma! 🎂🥳

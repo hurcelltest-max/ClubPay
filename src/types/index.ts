@@ -48,6 +48,16 @@ export interface Customer {
   created_at: string;
 }
 
+export interface Product {
+  id: string;
+  merchant_id: string;
+  name: string;
+  category: string;
+  brand?: string;
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface Transaction {
   id: string;
   merchant_id: string;
@@ -56,6 +66,7 @@ export interface Transaction {
   type: 'purchase' | 'payment' | 'points_earned' | 'points_spent';
   status: 'completed' | 'pending' | 'late';
   description: string;
+  items?: { product_id: string; quantity: number }[];
   created_at: string;
 }
 

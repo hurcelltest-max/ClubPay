@@ -1,16 +1,38 @@
 import React, { useState } from 'react';
-import { CreditCard, ArrowDownCircle, CheckCircle2, Zap } from 'lucide-react';
+import { CreditCard, ArrowDownCircle, CheckCircle2, Zap, ShoppingCart, Plus, Minus } from 'lucide-react';
 import { useDemoStore } from '../../store/demoStore';
 
 export default function MerchantTransactions() {
   const [activeTab, setActiveTab] = useState<'sale' | 'payment'>('sale');
-  const { customers, addSale, addPayment } = useDemoStore();
+  const { customers, products, addSale, addPayment } = useDemoStore();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [amount, setAmount] = useState('');
   const [saleType, setSaleType] = useState<'peşin' | 'veresiye' | 'puan_kullanımı'>('peşin');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [selectedProducts, setSelectedProducts] = useState<{productId: string, quantity: number}[]>([]);
+
+  const handleProductToggle = (productId: string) => {
+    setSelectedProducts(prev => {
+      const existing = prev.find(p => p.productId === productId);
+      if (existing) {
+        return prev.filter(p => p.productId !== productId);
+      } else {
+        return [...prev, { productId, quantity: 1 }];
+      }
+    });
+  };
+
+  const handleQuantityChange = (productId: string, delta: number) => {
+    setSelectedProducts(prev => prev.map(p => {
+      if (p.productId === productId) {
+        const newQuantity = Math.max(1, p.quantity + delta);
+        return { ...p, quantity: newQuantity };
+      }
+      return p;
+    }));
+  };
 
   const handleSaleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,11 +43,13 @@ export default function MerchantTransactions() {
       saleType, 
       description || 'Mağaza Alışverişi', 
       saleType === 'puan_kullanımı' ? Number(amount) : 0,
-      dueDate
+      dueDate,
+      selectedProducts.length > 0 ? selectedProducts : undefined
     );
     setAmount('');
     setDescription('');
     setDueDate('');
+    setSelectedProducts([]);
   };
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
@@ -102,6 +126,60 @@ export default function MerchantTransactions() {
                     <option value="veresiye">Veresiye (Borca Ekle)</option>
                     <option value="puan_kullanımı">Puan İle Öde</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Ürün Seçimi */}
+              <div>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <ShoppingCart size={14} /> Ürünler (İsteğe Bağlı - Analiz İçin)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {products.filter(p => p.isActive).map(product => {
+                    const selected = selectedProducts.find(p => p.productId === product.id);
+                    return (
+                      <div 
+                        key={product.id}
+                        className={`flex items-center rounded-xl border transition-all overflow-hidden ${
+                          selected 
+                            ? 'bg-primary-50 border-primary-200 shadow-sm' 
+                            : 'bg-white border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleProductToggle(product.id)}
+                          className={`px-3 py-2 text-sm font-bold transition-colors ${
+                            selected ? 'text-primary-700' : 'text-slate-600'
+                          }`}
+                        >
+                          {product.name}
+                        </button>
+                        
+                        {selected && (
+                          <div className="flex items-center bg-primary-100/50 border-l border-primary-200/50">
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(product.id, -1)}
+                              className="p-2 text-primary-600 hover:bg-primary-200/50 transition-colors"
+                            >
+                              <Minus size={14} />
+                            </button>
+                            <span className="w-6 text-center text-xs font-black text-primary-700">
+                              {selected.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(product.id, 1)}
+                              className="p-2 text-primary-600 hover:bg-primary-200/50 transition-colors"
+                            >
+                              <Plus size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

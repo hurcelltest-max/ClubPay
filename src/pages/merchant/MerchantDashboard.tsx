@@ -1,7 +1,8 @@
 import React from 'react';
-import { Users, TrendingUp, AlertCircle, ScanLine, CreditCard } from 'lucide-react';
+import { Users, TrendingUp, AlertCircle, ScanLine, CreditCard, Heart, ShoppingBag, RefreshCw, MessageCircle, Sparkles } from 'lucide-react';
 import { useDemoStore } from '../../store/demoStore';
 import { StatCard } from '../../components/ui/StatCard';
+import { WHATSAPP_TEMPLATES, generateWhatsAppLink } from '../../services/whatsappService';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { Link } from 'react-router-dom';
@@ -17,7 +18,8 @@ const mockChartData = [
 ];
 
 export default function MerchantDashboard() {
-  const { customers, transactions, user } = useDemoStore();
+  const { customers, transactions, user, generateCustomerInsights, markWhatsAppSent } = useDemoStore();
+  const insights = generateCustomerInsights();
 
   const totalDebt = customers.reduce((acc, c) => acc + c.usedCredit, 0);
   const totalSales = transactions.filter(t => t.type !== 'tahsilat').reduce((acc, t) => acc + t.amount, 0);
@@ -68,6 +70,74 @@ export default function MerchantDashboard() {
           trendDirection="up" 
           color="slate" 
         />
+      </div>
+
+      {/* Müşteri Alışkanlıkları & Akıllı Fırsatlar */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles className="text-amber-500" size={24} />
+          <h2 className="text-xl font-bold text-slate-900">Müşteri Alışkanlıkları & Fırsatlar</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {insights.length === 0 ? (
+             <div className="col-span-3 p-8 bg-slate-50 border border-slate-100 rounded-2xl text-center text-slate-500 font-medium">
+               Henüz yeterli alışveriş verisi birikmedi. Sistem yakında öneriler sunmaya başlayacak.
+             </div>
+          ) : (
+            insights.map((insight, idx) => {
+              const customer = customers.find(c => c.id === insight.customerId);
+              
+              const getIcon = () => {
+                if (insight.type === 'repurchase_warning') return <RefreshCw size={20} className="text-blue-500" />;
+                if (insight.type === 'loyal_product') return <Heart size={20} className="text-rose-500" />;
+                return <ShoppingBag size={20} className="text-emerald-500" />;
+              };
+
+              const getBgColor = () => {
+                if (insight.type === 'repurchase_warning') return 'bg-blue-50 border-blue-100';
+                if (insight.type === 'loyal_product') return 'bg-rose-50 border-rose-100';
+                return 'bg-emerald-50 border-emerald-100';
+              };
+
+              const handleWhatsApp = () => {
+                if (!customer) return; // Popüler ürün genel bir mesajdır, şimdilik atla
+                
+                const templateId = insight.type === 'repurchase_warning' ? 'repurchase_reminder' : 'product_campaign';
+                const template = WHATSAPP_TEMPLATES.find(t => t.id === templateId) || WHATSAPP_TEMPLATES[0];
+                
+                const message = template.message({
+                  customerName: customer.name,
+                  merchantName: user?.name || 'Esnafımız',
+                  productName: insight.productName
+                });
+
+                const link = generateWhatsAppLink(customer.phone!, message);
+                markWhatsAppSent(customer.id);
+                window.open(link, '_blank');
+              };
+
+              return (
+                <div key={idx} className={`p-5 rounded-2xl border ${getBgColor()} flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow`}>
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      {getIcon()}
+                      <h3 className="font-bold text-slate-900 text-sm">{insight.title}</h3>
+                    </div>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-4">{insight.description}</p>
+                  </div>
+                  {customer && (
+                    <button 
+                      onClick={handleWhatsApp}
+                      className="flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-slate-200 rounded-xl text-emerald-600 font-bold text-sm hover:bg-emerald-50 hover:border-emerald-200 transition-colors shadow-sm"
+                    >
+                      <MessageCircle size={16} /> WhatsApp ile Hatırlat
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* Charts Section */}
