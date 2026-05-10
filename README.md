@@ -36,6 +36,18 @@ ClubPay, sadece bir web sitesi değil, Store'lara çıkmaya hazır bir altyapıy
 - **Safe Area Handling:** iOS çentik ve alt navigasyon çubuğu korumaları (viewport-fit=cover ve pb-safe) CSS katmanında hazırdır.
 - **Standalone Experience:** Uygulama ana ekrana eklendiğinde tarayıcı arayüzü olmadan, tam ekran (standalone) native uygulama deneyimi sunar.
 
+---
+
+## ⚠️ KRİTİK: Android Keystore ve Güvenlik Uyarıları
+
+Android uygulamasını imzalarken oluşturulacak olan **Keystore (.keystore / .jks)** dosyası ClubPay'in tapusudur.
+
+1.  **ASLA KAYBETMEYİN:** Bu dosya kaybolursa, Google Play'deki uygulamayı asla güncelleyemezsiniz. Dosyayı güvenli bir cloud drive (şifreli) veya fiziksel bir diskte yedekleyin.
+2.  **GİZLİ TUTUN:** Keystore dosyasını ve şifrelerini asla GitHub gibi halka açık platformlara yüklemeyin. `.gitignore` dosyası bu dosyaları engellemek üzere yapılandırılmıştır.
+3.  **BİLGİLERİ NOT EDİN:** Oluştururken kullandığınız `alias`, `keystore password` ve `key password` bilgilerini güvenli bir şifre yöneticisinde saklayın.
+
+---
+
 ## Geliştirme Ortamı Kurulumu
 
 ```bash
