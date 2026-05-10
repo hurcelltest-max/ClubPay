@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, TrendingUp, AlertCircle, ScanLine, CreditCard, Heart, ShoppingBag, RefreshCw, MessageCircle, Sparkles } from 'lucide-react';
+import { Users, TrendingUp, AlertCircle, ScanLine, CreditCard, Heart, ShoppingBag, RefreshCw, MessageCircle, Sparkles, Activity, Clock, CheckCircle2 } from 'lucide-react';
 import { useDemoStore } from '../../store/demoStore';
 import { StatCard } from '../../components/ui/StatCard';
 import { WHATSAPP_TEMPLATES, generateWhatsAppLink } from '../../services/whatsappService';
@@ -18,12 +18,21 @@ const mockChartData = [
 ];
 
 export default function MerchantDashboard() {
-  const { customers, transactions, user, generateCustomerInsights, markWhatsAppSent } = useDemoStore();
+  const { customers, transactions, user, generateCustomerInsights, addWhatsAppMessage } = useDemoStore();
   const insights = generateCustomerInsights();
 
   const totalDebt = customers.reduce((acc, c) => acc + c.usedCredit, 0);
   const totalSales = transactions.filter(t => t.type !== 'tahsilat').reduce((acc, t) => acc + t.amount, 0);
   const debtorsCount = customers.filter(c => c.usedCredit > 0).length;
+
+  const todayTransactions = transactions.filter(t => {
+    const today = new Date().toISOString().split('T')[0];
+    return t.date.startsWith(today);
+  });
+  const todayCustomerCount = new Set(todayTransactions.map(t => t.customerId)).size;
+
+  const repeatCustomers = customers.filter(c => c.totalTransactionsCount > 1).length;
+  const repeatRate = customers.length > 0 ? Math.round((repeatCustomers / customers.length) * 100) : 0;
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -45,7 +54,7 @@ export default function MerchantDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <StatCard 
           title="Toplam Satış Hacmi" 
           value={`₺${totalSales.toLocaleString()}`} 
@@ -55,21 +64,110 @@ export default function MerchantDashboard() {
           color="primary" 
         />
         <StatCard 
-          title="Bekleyen Alacak (Veresiye)" 
+          title="Bugün Gelen" 
+          value={`${todayCustomerCount} Müşteri`} 
+          icon={Users} 
+          trend="Düne göre +3" 
+          trendDirection="up" 
+          color="green" 
+        />
+        <StatCard 
+          title="Tekrar Gelen Oranı" 
+          value={`%${repeatRate}`} 
+          icon={RefreshCw} 
+          trend="Sadakat yüksek" 
+          trendDirection="up" 
+          color="purple" 
+        />
+        <StatCard 
+          title="Bekleyen Alacak" 
           value={`₺${totalDebt.toLocaleString()}`} 
           icon={AlertCircle} 
           trend={`${debtorsCount} müşteride`} 
           trendDirection="down" 
           color="orange" 
         />
-        <StatCard 
-          title="Toplam Kayıtlı Müşteri" 
-          value={customers.length} 
-          icon={Users} 
-          trend="Bu hafta +2" 
-          trendDirection="up" 
-          color="slate" 
-        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        {/* Charts Section */}
+        <div className="lg:col-span-2 bg-white p-6 border border-slate-100 rounded-3xl shadow-card hover:shadow-premium transition-shadow group">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Activity className="text-primary-500" size={20} />
+              Satış & Veresiye Trendi
+            </h2>
+          </div>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={mockChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorSatis" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorVeresiye" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.1)' }}
+                  itemStyle={{ fontSize: '14px', fontWeight: 'bold' }}
+                />
+                <Area type="monotone" dataKey="satis" name="Peşin Satış" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorSatis)" />
+                <Area type="monotone" dataKey="veresiye" name="Veresiye" stroke="#f97316" strokeWidth={3} fillOpacity={1} fill="url(#colorVeresiye)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Son İşlemler Akışı */}
+        <div className="bg-white border border-slate-100 rounded-3xl shadow-card hover:shadow-premium transition-shadow flex flex-col">
+          <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50 rounded-t-3xl">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Clock size={20} className="text-slate-400" />
+              Canlı Akış
+            </h2>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold animate-pulse">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Canlı
+            </div>
+          </div>
+          <div className="p-6 flex-1 overflow-y-auto max-h-[300px] space-y-4">
+            {transactions.slice(0, 5).map((tx) => {
+              const customer = customers.find(c => c.id === tx.customerId);
+              const isPositive = tx.type !== 'tahsilat';
+              return (
+                <div key={tx.id} className="flex items-center justify-between group">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${
+                      tx.type === 'veresiye' ? 'bg-orange-50 text-orange-600' :
+                      tx.type === 'tahsilat' ? 'bg-emerald-50 text-emerald-600' :
+                      'bg-indigo-50 text-indigo-600'
+                    }`}>
+                      {tx.type === 'veresiye' ? <AlertCircle size={18} /> : tx.type === 'tahsilat' ? <CheckCircle2 size={18} /> : <CreditCard size={18} />}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">{customer?.name || 'Bilinmiyor'}</p>
+                      <p className="text-xs text-slate-500 font-medium truncate max-w-[120px]">{tx.description}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-black text-sm ${isPositive ? 'text-slate-900' : 'text-emerald-600'}`}>
+                      {isPositive ? '' : '-'}₺{Math.abs(tx.amount).toLocaleString()}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">
+                      {new Date(tx.date).toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'})}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Müşteri Alışkanlıkları & Akıllı Fırsatlar */}
@@ -90,12 +188,16 @@ export default function MerchantDashboard() {
               const getIcon = () => {
                 if (insight.type === 'repurchase_warning') return <RefreshCw size={20} className="text-blue-500" />;
                 if (insight.type === 'loyal_product') return <Heart size={20} className="text-rose-500" />;
+                if (insight.type === 'silent_customer') return <Clock size={20} className="text-slate-500" />;
+                if (insight.type === 'campaign_affinity') return <Sparkles size={20} className="text-amber-500" />;
                 return <ShoppingBag size={20} className="text-emerald-500" />;
               };
 
               const getBgColor = () => {
                 if (insight.type === 'repurchase_warning') return 'bg-blue-50 border-blue-100';
                 if (insight.type === 'loyal_product') return 'bg-rose-50 border-rose-100';
+                if (insight.type === 'silent_customer') return 'bg-slate-50 border-slate-200';
+                if (insight.type === 'campaign_affinity') return 'bg-amber-50 border-amber-100';
                 return 'bg-emerald-50 border-emerald-100';
               };
 
@@ -112,7 +214,7 @@ export default function MerchantDashboard() {
                 });
 
                 const link = generateWhatsAppLink(customer.phone!, message);
-                markWhatsAppSent(customer.id);
+                addWhatsAppMessage(customer.id, templateId, message);
                 window.open(link, '_blank');
               };
 
@@ -140,37 +242,6 @@ export default function MerchantDashboard() {
         </div>
       </div>
 
-      {/* Charts Section */}
-      <div className="bg-white p-6 border border-slate-100 rounded-3xl shadow-card mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-slate-900">Haftalık Satış & Veresiye Trendi</h2>
-        </div>
-        <div className="h-72 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={mockChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorSatis" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorVeresiye" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-              <Tooltip 
-                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.1)' }}
-                itemStyle={{ fontSize: '14px', fontWeight: '500' }}
-              />
-              <Area type="monotone" dataKey="satis" name="Peşin Satış" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorSatis)" />
-              <Area type="monotone" dataKey="veresiye" name="Veresiye" stroke="#f97316" strokeWidth={3} fillOpacity={1} fill="url(#colorVeresiye)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
 
       {/* Debtors Table */}
       <div className="bg-white border border-slate-100 rounded-3xl shadow-card overflow-hidden">

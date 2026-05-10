@@ -17,7 +17,13 @@ export type DemoUser = {
   trustLevel: 'Güvenilir' | 'Düzenli' | 'Orta Risk' | 'Dikkatli';
   networkOptIn: boolean;
   totalTransactionsCount: number;
-  lastWhatsAppDate?: string;
+  whatsappHistory: {
+    id: string;
+    date: string;
+    type: string;
+    content: string;
+    isRead: boolean;
+  }[];
 };
 
 export type Product = {
@@ -62,33 +68,35 @@ interface DemoState {
   logout: () => void;
   resetDemo: () => void;
   toggleNetworkOptIn: () => void;
-  markWhatsAppSent: (customerId: string) => void;
+  addWhatsAppMessage: (customerId: string, type: string, content: string) => void;
   addSale: (customerId: string, amount: number, type: 'peşin' | 'veresiye' | 'puan_kullanımı', description: string, pointsToUse?: number, dueDate?: string, items?: { productId: string; quantity: number }[]) => void;
   addPayment: (customerId: string, amount: number) => void;
   addCampaign: (campaign: Omit<Campaign, 'id' | 'status'>) => void;
-  addCustomer: (customer: Omit<DemoUser, 'id' | 'qrCode' | 'role' | 'usedCredit' | 'points' | 'riskLevel' | 'clubScore' | 'trustLevel' | 'networkOptIn' | 'totalTransactionsCount'>) => void;
+  addCustomer: (customer: Omit<DemoUser, 'id' | 'role' | 'points' | 'qrCode' | 'usedCredit' | 'riskLevel' | 'clubScore' | 'trustLevel' | 'networkOptIn' | 'totalTransactionsCount' | 'whatsappHistory'>) => void;
 }
 
 const INITIAL_CUSTOMERS: DemoUser[] = [
   { 
     id: 'c1', name: 'Ahmet Yılmaz', role: 'customer', phone: '0532 111 22 33', points: 1450, usedCredit: 850, creditLimit: 5000, riskLevel: 'Gümüş', qrCode: 'CP-1001-A',
-    clubScore: 88, trustLevel: 'Güvenilir', networkOptIn: true, totalTransactionsCount: 124
+    clubScore: 88, trustLevel: 'Güvenilir', networkOptIn: true, totalTransactionsCount: 124, whatsappHistory: []
   },
   { 
     id: 'c2', name: 'Ayşe Demir', role: 'customer', phone: '0533 222 33 44', points: 300, usedCredit: 0, creditLimit: 2000, riskLevel: 'Altın', qrCode: 'CP-1002-B',
-    clubScore: 95, trustLevel: 'Güvenilir', networkOptIn: true, totalTransactionsCount: 56
+    clubScore: 95, trustLevel: 'Güvenilir', networkOptIn: true, totalTransactionsCount: 56, whatsappHistory: [
+      { id: 'w1', date: new Date(Date.now() - 86400000).toISOString(), type: 'loyal_customer', content: 'Değerli Ayşe Demir, bizi tercih ettiğin için teşekkürler...', isRead: true }
+    ]
   },
   { 
     id: 'c3', name: 'Mehmet Kaya', role: 'customer', phone: '0555 333 44 55', points: 0, usedCredit: 4200, creditLimit: 5000, riskLevel: 'Bronz', qrCode: 'CP-1003-C',
-    clubScore: 42, trustLevel: 'Dikkatli', networkOptIn: false, totalTransactionsCount: 210
+    clubScore: 42, trustLevel: 'Dikkatli', networkOptIn: false, totalTransactionsCount: 210, whatsappHistory: []
   },
   { 
     id: 'c4', name: 'Zeynep Arslan', role: 'customer', phone: '0544 444 55 66', points: 2500, usedCredit: 150, creditLimit: 10000, riskLevel: 'Altın', qrCode: 'CP-1004-D',
-    clubScore: 92, trustLevel: 'Güvenilir', networkOptIn: true, totalTransactionsCount: 89
+    clubScore: 92, trustLevel: 'Güvenilir', networkOptIn: true, totalTransactionsCount: 89, whatsappHistory: []
   },
   { 
     id: 'c5', name: 'Caner Özcan', role: 'customer', phone: '0505 555 66 77', points: 85, usedCredit: 1250, creditLimit: 3000, riskLevel: 'Gümüş', qrCode: 'CP-1005-E',
-    clubScore: 68, trustLevel: 'Orta Risk', networkOptIn: true, totalTransactionsCount: 45
+    clubScore: 68, trustLevel: 'Orta Risk', networkOptIn: true, totalTransactionsCount: 45, whatsappHistory: []
   },
 ];
 
@@ -120,7 +128,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
 
 export type CustomerInsight = {
   customerId: string;
-  type: 'repurchase_warning' | 'popular_product' | 'loyal_product';
+  type: 'repurchase_warning' | 'popular_product' | 'loyal_product' | 'silent_customer' | 'campaign_affinity';
   title: string;
   description: string;
   productId?: string;
@@ -142,39 +150,67 @@ export const useDemoStore = create<DemoState>()(
         
         // Basit analitik: Her müşteri için son alınan ürünleri kontrol et
         state.customers.forEach(customer => {
-          const customerTx = state.transactions.filter(t => t.customerId === customer.id && t.items && t.items.length > 0);
+          const customerTx = state.transactions.filter(t => t.customerId === customer.id);
           
           if (customerTx.length > 0) {
-            // En son işlemi al
-            const lastTx = customerTx[0]; // transactions azalan tarih sırasındaysa
-            if (lastTx.items && lastTx.items.length > 0) {
-              const product = state.products.find(p => p.id === lastTx.items![0].productId);
-              if (product) {
-                // Şampuan gibi hızlı tüketim ürünleri için 'tekrar alma' tahmini
-                if (product.category === 'Kişisel Bakım' || product.category === 'Gıda') {
-                  const daysSince = Math.floor((new Date().getTime() - new Date(lastTx.date).getTime()) / (1000 * 3600 * 24));
-                  if (daysSince > 20) {
-                    insights.push({
-                      customerId: customer.id,
-                      type: 'repurchase_warning',
-                      title: 'Tekrar Satın Alma Yaklaştı',
-                      description: `${customer.name}, son ${daysSince} gündür ${product.name} satın almadı.`,
-                      productId: product.id,
-                      productName: product.name
-                    });
+            // Son ziyareti bul
+            const lastVisit = new Date(customerTx[0].date);
+            const daysSinceVisit = Math.floor((new Date().getTime() - lastVisit.getTime()) / (1000 * 3600 * 24));
+            
+            // Sessiz Müşteri (30+ gün)
+            if (daysSinceVisit > 30) {
+              insights.push({
+                customerId: customer.id,
+                type: 'silent_customer',
+                title: 'Sessiz Müşteri',
+                description: `${customer.name} ${daysSinceVisit} gündür uğramadı. Sıcak bir davet mesajı gönderebilirsiniz.`,
+              });
+            }
+
+            // Kampanya Hassasiyeti (Daha önce puan kullanmış mı?)
+            const hasUsedPoints = customerTx.some(t => t.type === 'puan_kullanımı');
+            if (hasUsedPoints && customerTx.length > 3) {
+              insights.push({
+                customerId: customer.id,
+                type: 'campaign_affinity',
+                title: 'Kampanyalara İlgi Gösteriyor',
+                description: `${customer.name} indirim ve puan kullanmayı seviyor. Yeni bir kampanya teklifine olumlu yanıt verebilir.`,
+              });
+            }
+
+            // Ürün bazlı tahminler
+            const productTxs = customerTx.filter(t => t.items && t.items.length > 0);
+            if (productTxs.length > 0) {
+              const lastTxWithProducts = productTxs[0];
+              if (lastTxWithProducts.items && lastTxWithProducts.items.length > 0) {
+                const product = state.products.find(p => p.id === lastTxWithProducts.items![0].productId);
+                if (product) {
+                  // Şampuan gibi hızlı tüketim ürünleri için 'tekrar alma' tahmini
+                  if (product.category === 'Kişisel Bakım' || product.category === 'Gıda') {
+                    const daysSinceProd = Math.floor((new Date().getTime() - new Date(lastTxWithProducts.date).getTime()) / (1000 * 3600 * 24));
+                    if (daysSinceProd > 20 && daysSinceProd <= 30) {
+                      insights.push({
+                        customerId: customer.id,
+                        type: 'repurchase_warning',
+                        title: 'Tekrar Satın Alma Yaklaştı',
+                        description: `${customer.name}, son alışverişinden bu yana ${product.name} bitmiş olabilir.`,
+                        productId: product.id,
+                        productName: product.name
+                      });
+                    }
                   }
-                }
-                
-                // Çok satın alınan ürünler için 'sadık ürün' tespiti
-                if (customerTx.length > 2) {
-                   insights.push({
-                      customerId: customer.id,
-                      type: 'loyal_product',
-                      title: 'Sadık Müşteri Ürünü',
-                      description: `${customer.name}, bu ürünü düzenli olarak tercih ediyor.`,
-                      productId: product.id,
-                      productName: product.name
-                   });
+                  
+                  // Çok satın alınan ürünler için 'sadık ürün' tespiti
+                  if (productTxs.length > 2) {
+                     insights.push({
+                        customerId: customer.id,
+                        type: 'loyal_product',
+                        title: 'Sadık Müşteri Ürünü',
+                        description: `${customer.name}, bu ürünü düzenli olarak tercih ediyor.`,
+                        productId: product.id,
+                        productName: product.name
+                     });
+                  }
                 }
               }
             }
@@ -203,13 +239,13 @@ export const useDemoStore = create<DemoState>()(
         } else if (role === 'merchant') {
           set({ user: { 
             id: 'm1', name: 'HurCELL İletişim', role: 'merchant', points: 0, creditLimit: 0, usedCredit: 0, riskLevel: 'Altın', qrCode: '',
-            clubScore: 0, trustLevel: 'Güvenilir', networkOptIn: false, totalTransactionsCount: 0
+            clubScore: 0, trustLevel: 'Güvenilir', networkOptIn: false, totalTransactionsCount: 0, whatsappHistory: []
           } });
           toast.success('İşletme paneli açıldı. İyi mesailer!');
         } else {
           set({ user: { 
             id: 'a1', name: 'ClubPay Yönetim', role: 'admin', points: 0, creditLimit: 0, usedCredit: 0, riskLevel: 'Altın', qrCode: '',
-            clubScore: 0, trustLevel: 'Güvenilir', networkOptIn: false, totalTransactionsCount: 0
+            clubScore: 0, trustLevel: 'Güvenilir', networkOptIn: false, totalTransactionsCount: 0, whatsappHistory: []
           } });
           toast.success('Sistem yöneticisi girişi başarılı.');
         }
@@ -233,10 +269,16 @@ export const useDemoStore = create<DemoState>()(
         }
       },
 
-      markWhatsAppSent: (customerId) => {
+      addWhatsAppMessage: (customerId, type, content) => {
         set((state) => ({
           customers: state.customers.map(c => 
-            c.id === customerId ? { ...c, lastWhatsAppDate: new Date().toISOString() } : c
+            c.id === customerId ? { 
+              ...c, 
+              whatsappHistory: [
+                { id: Math.random().toString(36).substring(7), date: new Date().toISOString(), type, content, isRead: false },
+                ...(c.whatsappHistory || [])
+              ]
+            } : c
           )
         }));
       },
@@ -364,7 +406,8 @@ export const useDemoStore = create<DemoState>()(
             clubScore: 50,
             trustLevel: 'Düzenli',
             networkOptIn: false,
-            totalTransactionsCount: 0
+            totalTransactionsCount: 0,
+            whatsappHistory: []
           };
           toast.success(`${customerData.name} dijital kartıyla birlikte sisteme kaydedildi.`, { icon: '🤝' });
           return { customers: [...state.customers, newCustomer] };

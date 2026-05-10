@@ -29,9 +29,11 @@ function App() {
           <Route path="/admin" element={<Navigate to="/" replace />} />
           
           {/* Protected Apps */}
-          <Route path="/customer/*" element={<CustomerApp />} />
           <Route path="/merchant/*" element={<MerchantApp />} />
           <Route path="/super-admin-hidden/*" element={<InternalAdminApp />} />
+          
+          {/* Multi-tenant Customer App (e.g. clubpay.tr/jum-burger) */}
+          <Route path="/:merchantSlug/*" element={<CustomerApp />} />
 
           {/* 404 Catch All */}
           <Route path="*" element={<NotFound />} />

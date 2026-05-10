@@ -17,7 +17,7 @@ interface WhatsAppModalProps {
 }
 
 export default function WhatsAppModal({ isOpen, onClose, customer }: WhatsAppModalProps) {
-  const { user, markWhatsAppSent } = useDemoStore();
+  const { user, addWhatsAppMessage } = useDemoStore();
   const [selectedTemplate, setSelectedTemplate] = useState(WHATSAPP_TEMPLATES[0]);
   const [editedMessage, setEditedMessage] = useState(
     WHATSAPP_TEMPLATES[0].message({
@@ -52,7 +52,7 @@ export default function WhatsAppModal({ isOpen, onClose, customer }: WhatsAppMod
 
   const handleSend = () => {
     const link = generateWhatsAppLink(customer.phone, editedMessage);
-    markWhatsAppSent(customer.id);
+    addWhatsAppMessage(customer.id, selectedTemplate.id, editedMessage);
     window.open(link, '_blank');
     onClose();
   };

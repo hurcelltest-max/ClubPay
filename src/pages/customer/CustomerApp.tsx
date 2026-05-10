@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bell, Gift, CreditCard, QrCode, Home as HomeIcon, Globe, ShieldCheck, Zap } from 'lucide-react';
 import { useDemoStore } from '../../store/demoStore';
-import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Routes, Route, Link, useLocation, useParams } from 'react-router-dom';
 import CustomerWallet from './CustomerWallet';
 import CustomerQR from './CustomerQR';
 
@@ -137,23 +137,26 @@ function CustomerHome() {
 
 function BottomNav() {
   const location = useLocation();
+  const { merchantSlug } = useParams<{ merchantSlug: string }>();
+  const basePath = `/${merchantSlug || 'customer'}`;
+  
   const isActive = (path: string) => location.pathname === path;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-100 pb-safe z-50">
       <div className="flex justify-around items-center h-20 px-6 max-w-md mx-auto">
-        <Link to="/customer" className={`flex flex-col items-center gap-1.5 p-2 transition-colors ${isActive('/customer') ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-          <HomeIcon size={24} className={isActive('/customer') ? 'stroke-[2.5px]' : ''} />
+        <Link to={`${basePath}`} className={`flex flex-col items-center gap-1.5 p-2 transition-colors ${isActive(basePath) || isActive(`${basePath}/`) ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+          <HomeIcon size={24} className={isActive(basePath) || isActive(`${basePath}/`) ? 'stroke-[2.5px]' : ''} />
           <span className="text-[10px] font-bold">Ana Sayfa</span>
         </Link>
-        <Link to="/customer/qr" className={`flex flex-col items-center gap-1.5 p-2 transition-colors ${isActive('/customer/qr') ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-premium transition-transform active:scale-95 ${isActive('/customer/qr') ? 'bg-primary-600 text-white' : 'bg-slate-900 text-white'}`}>
+        <Link to={`${basePath}/qr`} className={`flex flex-col items-center gap-1.5 p-2 transition-colors ${isActive(`${basePath}/qr`) ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center -mt-8 shadow-premium transition-transform active:scale-95 ${isActive(`${basePath}/qr`) ? 'bg-primary-600 text-white' : 'bg-slate-900 text-white'}`}>
             <QrCode size={24} />
           </div>
           <span className="text-[10px] font-bold mt-1">QR Kartım</span>
         </Link>
-        <Link to="/customer/wallet" className={`flex flex-col items-center gap-1.5 p-2 transition-colors ${isActive('/customer/wallet') ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-          <CreditCard size={24} className={isActive('/customer/wallet') ? 'stroke-[2.5px]' : ''} />
+        <Link to={`${basePath}/wallet`} className={`flex flex-col items-center gap-1.5 p-2 transition-colors ${isActive(`${basePath}/wallet`) ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+          <CreditCard size={24} className={isActive(`${basePath}/wallet`) ? 'stroke-[2.5px]' : ''} />
           <span className="text-[10px] font-bold">Cüzdan</span>
         </Link>
       </div>

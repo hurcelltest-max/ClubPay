@@ -11,7 +11,7 @@ export default function Login() {
   const handleLogin = (role: 'customer' | 'merchant' | 'admin', path: string) => {
     login(role);
     // Admin ise gizli rotaya yönlendir
-    const finalPath = role === 'admin' ? '/super-admin-hidden' : path;
+    const finalPath = role === 'admin' ? '/super-admin-hidden' : (role === 'customer' ? '/demo-market' : path);
     navigate(finalPath);
   };
 

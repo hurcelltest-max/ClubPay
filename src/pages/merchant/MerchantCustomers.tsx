@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Search, Filter, PlusCircle, Globe, ShieldCheck, MessageSquare } from 'lucide-react';
 import { useDemoStore } from '../../store/demoStore';
 import WhatsAppModal from '../../components/merchant/WhatsAppModal';
+import CustomerDetailModal from '../../components/merchant/CustomerDetailModal';
 
 export default function MerchantCustomers() {
   const { customers, addCustomer } = useDemoStore();
   const [showAdd, setShowAdd] = useState(false);
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', creditLimit: 2000 });
   const [selectedCustomerForWhatsApp, setSelectedCustomerForWhatsApp] = useState<any>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +82,10 @@ export default function MerchantCustomers() {
               {customers.map(customer => (
                 <tr key={customer.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="p-6">
-                    <div className="flex items-center gap-2">
+                    <div 
+                      className="flex items-center gap-2 cursor-pointer"
+                      onClick={() => setSelectedCustomerId(customer.id)}
+                    >
                       <p className="font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{customer.name}</p>
                       {customer.networkOptIn && (
                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-md text-[10px] font-bold border border-indigo-100" title="Esnaf Güven Ağı Üyesi">
@@ -151,6 +156,12 @@ export default function MerchantCustomers() {
           customer={selectedCustomerForWhatsApp}
         />
       )}
+
+      <CustomerDetailModal 
+        isOpen={!!selectedCustomerId}
+        onClose={() => setSelectedCustomerId(null)}
+        customerId={selectedCustomerId}
+      />
     </div>
   );
 }

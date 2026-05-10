@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, ArrowDownCircle, CheckCircle2, Zap, ShoppingCart, Plus, Minus } from 'lucide-react';
+import { CreditCard, ArrowDownCircle, CheckCircle2, Zap, ShoppingCart, Plus, Minus, Search, User } from 'lucide-react';
 import { useDemoStore } from '../../store/demoStore';
 
 export default function MerchantTransactions() {
@@ -12,6 +12,9 @@ export default function MerchantTransactions() {
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<{productId: string, quantity: number}[]>([]);
+
+  // Hızlı Seçim İçin Son İşlem Yapılan Müşteriler
+  const recentCustomers = [...customers].sort((a, b) => b.totalTransactionsCount - a.totalTransactionsCount).slice(0, 4);
 
   const handleProductToggle = (productId: string) => {
     setSelectedProducts(prev => {
@@ -84,48 +87,78 @@ export default function MerchantTransactions() {
 
         <div className="p-10">
           {activeTab === 'sale' ? (
-            <form onSubmit={handleSaleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Müşteri Seçimi</label>
-                <select 
-                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all font-bold text-slate-700"
-                  value={selectedCustomerId}
-                  onChange={(e) => setSelectedCustomerId(e.target.value)}
-                  required
+            <form onSubmit={handleSaleSubmit} className="space-y-8">
+              
+              {/* Ödeme Türü Hızlı Toggle */}
+              <div className="flex p-1.5 bg-slate-100 rounded-2xl">
+                <button 
+                  type="button"
+                  onClick={() => setSaleType('peşin')}
+                  className={`flex-1 py-3.5 rounded-xl font-bold text-sm transition-all ${saleType === 'peşin' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                 >
-                  <option value="">İşlem yapılacak müşteriyi seçin...</option>
-                  {customers.map(c => (
-                    <option key={c.id} value={c.id}>{c.name} — (Kalan Limit: ₺{c.creditLimit - c.usedCredit})</option>
+                  💳 Nakit / K.Kartı
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setSaleType('veresiye')}
+                  className={`flex-1 py-3.5 rounded-xl font-bold text-sm transition-all ${saleType === 'veresiye' ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  📝 Veresiye Ekle
+                </button>
+              </div>
+
+              {/* Hızlı Müşteri Seçimi */}
+              <div>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Müşteri Seç</label>
+                
+                {/* Son Müşteriler Hızlı Butonlar */}
+                <div className="flex gap-3 mb-3 overflow-x-auto pb-2 -mx-2 px-2 snap-x">
+                  {recentCustomers.map(c => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setSelectedCustomerId(c.id)}
+                      className={`flex flex-col items-center gap-2 min-w-[72px] snap-start transition-transform active:scale-95 ${selectedCustomerId === c.id ? 'opacity-100' : 'opacity-60 hover:opacity-100'}`}
+                    >
+                      <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg border-2 ${selectedCustomerId === c.id ? 'bg-primary-50 border-primary-500 text-primary-700' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                        {c.name.charAt(0)}
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis w-full text-center">
+                        {c.name.split(' ')[0]}
+                      </span>
+                    </button>
                   ))}
-                </select>
+                </div>
+
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <select 
+                    className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all font-bold text-slate-700 appearance-none cursor-pointer"
+                    value={selectedCustomerId}
+                    onChange={(e) => setSelectedCustomerId(e.target.value)}
+                    required
+                  >
+                    <option value="">Tüm Müşteriler Arasında Ara...</option>
+                    {customers.map(c => (
+                      <option key={c.id} value={c.id}>{c.name} — (Kalan Limit: ₺{c.creditLimit - c.usedCredit})</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">İşlem Tutarı (₺)</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₺</span>
-                    <input 
-                      type="number" 
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      placeholder="0.00" 
-                      className="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all font-black text-xl text-slate-900" 
-                      required 
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Ödeme Türü</label>
-                  <select 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all font-bold text-slate-700"
-                    value={saleType}
-                    onChange={(e) => setSaleType(e.target.value as any)}
-                  >
-                    <option value="peşin">Nakit / Kredi Kartı</option>
-                    <option value="veresiye">Veresiye (Borca Ekle)</option>
-                    <option value="puan_kullanımı">Puan İle Öde</option>
-                  </select>
+              {/* Devasa Tutar Girişi */}
+              <div>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">İşlem Tutarı (₺)</label>
+                <div className="relative">
+                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-2xl">₺</span>
+                  <input 
+                    type="number" 
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0" 
+                    className="w-full pl-14 pr-6 py-6 bg-slate-50 border border-slate-200 rounded-[2rem] focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all font-black text-5xl text-slate-900 tracking-tighter placeholder:text-slate-300" 
+                    required 
+                  />
                 </div>
               </div>
 
