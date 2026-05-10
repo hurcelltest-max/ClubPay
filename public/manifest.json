@@ -3,10 +3,12 @@
   "short_name": "ClubPay",
   "description": "Mahalle esnafı için saniyeler içinde satış, veresiye takibi ve yapay zeka destekli kampanya yönetimi.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#059669",
+  "lang": "tr",
   "categories": ["business", "finance", "productivity"],
   "icons": [
     {

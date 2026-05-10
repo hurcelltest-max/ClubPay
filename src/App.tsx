@@ -8,6 +8,8 @@ const Login = React.lazy(() => import('./pages/auth/Login'));
 const CustomerApp = React.lazy(() => import('./pages/customer/CustomerApp'));
 const MerchantApp = React.lazy(() => import('./pages/merchant/MerchantApp'));
 const InternalAdminApp = React.lazy(() => import('./pages/admin/AdminApp'));
+const Privacy = React.lazy(() => import('./pages/legal/Privacy'));
+const Terms = React.lazy(() => import('./pages/legal/Terms'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 // Global loading fallback
@@ -31,6 +33,10 @@ function App() {
           {/* Protected Apps */}
           <Route path="/merchant/*" element={<MerchantApp />} />
           <Route path="/super-admin-hidden/*" element={<InternalAdminApp />} />
+          
+          {/* Legal Pages */}
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           
           {/* Multi-tenant Customer App (e.g. clubpay.tr/jum-burger) */}
           <Route path="/:merchantSlug/*" element={<CustomerApp />} />
