@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "tr.clubpay.app",
+      "sha256_cert_fingerprints": ["D1:0B:99:18:66:41:AE:23:0C:9A:86:7A:FC:9A:5A:C1:F7:CE:46:0C:ED:4E:43:87:AA:8C:03:3A:AF:0D:72:EE"]
+    }
+  }
+]

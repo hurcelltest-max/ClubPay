@@ -1,5 +1,8 @@
 # ClubPay (SaaS & Mahalle Esnafı Sadakat Platformu)
 
+> [!IMPORTANT]
+> **ANDROID RELEASE & KEYSTORE BACKUP:** ClubPay Android uygulamasının imzalanması için kullanılan `clubpay-release.keystore` dosyası bu projenin en kritik varlığıdır. Bu dosya kaybolursa Google Play güncellemeleri imkansız hale gelir. Dosyayı şifreli bir yedekleme alanında saklayın.
+
 Bu proje, mahalle esnafını karmaşık ERP ve stok yazılımlarının yükünden kurtararak, basit, hızlı ve etkili bir müşteri ilişkileri (CRM) ve veresiye yönetim sistemine kavuşturmak amacıyla geliştirilmiştir.
 
 ## Mimarisi ve Routing (Multi-Tenant)
@@ -27,9 +30,9 @@ Proje Vercel üzerinde host edilmektedir.
 2. Her `main` branch push'unda Vercel otomatik olarak CI/CD sürecini çalıştırır.
 3. React Router (SPA) kaynaklı Vercel 404 hatalarını önlemek için projedeki `vercel.json` rewrite kuralları devrededir.
 
-## App Store / Google Play Future Preparation
+## App Store / Google Play Hazırlığı
 
-ClubPay, sadece bir web sitesi değil, Store'lara çıkmaya hazır bir altyapıya sahiptir.
+ClubPay, Store'lara çıkmaya hazır bir altyapıya sahiptir.
 
 - **PWA & TWA Ready:** Mevcut altyapı, Google Play için Trusted Web Activity (TWA) ve App Store için PWA Builder / WKWebView katmanları ile kolayca native paket haline getirilebilir.
 - **Manifest & Metadata:** `manifest.json` ve `index.html` üzerindeki PWA tanımlamaları (maskable icons, theme colors, status bar styles) en yüksek mobil uyumluluk standartlarına göre yapılandırılmıştır.
